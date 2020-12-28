@@ -1,12 +1,24 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <v-app light>
+    <span class="text-h1">test</span>
+    <div id="content">
+      <router-view />
     </div>
-    <router-view />
-  </div>
+    <div id="nav">
+      <BottomNavBar />
+    </div>
+  </v-app>
 </template>
+
+<script>
+import BottomNavBar from "./components/BottomNavBar";
+
+export default {
+  name: "Budgets",
+  components: { BottomNavBar },
+  props: {},
+};
+</script>
 
 <style>
 #app {
@@ -17,16 +29,18 @@
   color: #2c3e50;
 }
 
+#content {
+  background-color: lightcyan;
+}
+
 #nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+  width: 100%;
+  height: 45px;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+  background: #fcfcfc;
+  border-top: 1px solid #d6d8e7;
+  padding: 0 15px;
 }
 </style>
