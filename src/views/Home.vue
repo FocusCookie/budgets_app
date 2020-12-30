@@ -1,28 +1,36 @@
 <template>
   <div id="container">
-    <div :class="`budgetLeftContainer ${budgetContainerSize}`">
-      <span class="text-overline white--text ma-0">Budget Left</span>
+    <div :class="`budgetLeftContainer elevation-1 ${budgetContainerSize}`">
+      <span
+        v-if="budgetContainerSize === 'minified' ? false : true"
+        class="text-overline white--text ma-0"
+        >Budget Left</span
+      >
       <p
         :class="
-          `font-weight-bold white--text mb-0 ${
+          `font-weight-bold white--text mb-0 budgetShadow ${
             budgetContainerSize === 'minified' ? 'text-h4' : 'text-h1'
           }`
         "
       >
-        10000
+        + 10000
       </p>
     </div>
     <div
       :class="
-        `expensesContainer ${
+        `expensesContainer pb-8 ${
           budgetContainerSize === 'expanded'
             ? 'expensesPaddingTopWhenBugetLeftExpanded'
             : 'expensesPaddingTopWhenBugetLeftMinified'
         }`
       "
     >
-      <div class="py-2">
-        expenses cards
+      <div class="pa-3">
+        <Expenses />
+        <Expenses />
+        <Expenses />
+        <Expenses />
+        <Expenses />
       </div>
     </div>
   </div>
@@ -30,10 +38,13 @@
 
 <script>
 // @ is an alias to /src
+import Expenses from "@/components/Expenses";
 
 export default {
   name: "Home",
-  components: {},
+  components: {
+    Expenses,
+  },
   data() {
     return {
       scrolledFromTop: 0,
@@ -50,7 +61,8 @@ export default {
   },
   methods: {
     handleScroll(e) {
-      if (e.path[1].scrollY >= 10) {
+      console.log(e);
+      if (window.scrollY >= 5) {
         this.budgetContainerSize = "minified";
       } else {
         this.budgetContainerSize = "expanded";
@@ -66,11 +78,17 @@ export default {
 }
 .budgetLeftContainer {
   background: linear-gradient(123.87deg, #00ba88 0%, #d0e586 100%);
+  border-radius: 0 0 14px 14px;
   width: 100%;
   position: fixed;
   top: 0;
   transition-timing-function: ease-in-out;
-  transition: height 1s, padding 500ms;
+  transition: height 500ms, padding 500ms;
+  z-index: 100;
+}
+
+.budgetShadow {
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
 }
 
 .expanded {
@@ -79,7 +97,7 @@ export default {
 }
 
 .minified {
-  height: 84px;
+  height: 55px;
   padding: 6px 0;
 }
 
@@ -88,7 +106,7 @@ export default {
 }
 
 .expensesPaddingTopWhenBugetLeftMinified {
-  padding-top: 84px;
+  padding-top: 70px;
 }
 
 .expensesContainer {
@@ -98,11 +116,11 @@ export default {
 
 .text-h4 {
   transition-timing-function: ease-in-out;
-  transition: font-size 1s, line-height 1s, letter-spacing 1s;
+  transition: font-size 500ms, line-height 500ms, letter-spacing 500ms;
 }
 
 .text-h1 {
   transition-timing-function: ease-in-out;
-  transition: font-size 1s, line-height 1s, letter-spacing 1s;
+  transition: font-size 500ms, line-height 500ms, letter-spacing 500ms;
 }
 </style>
