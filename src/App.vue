@@ -1,6 +1,5 @@
 <template>
   <v-app light>
-    <span class="text-h1">test</span>
     <div id="content">
       <router-view />
     </div>
@@ -30,7 +29,7 @@ export default {
 }
 
 #content {
-  background-color: lightcyan;
+  height: 100%;
 }
 
 #nav {
