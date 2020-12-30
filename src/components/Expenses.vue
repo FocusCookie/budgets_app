@@ -1,5 +1,5 @@
 <template>
-  <div id="container" :class="`pa-3 mb-3 ${size ? 'expanded' : 'minified'}`">
+  <div id="container" :class="`pa-3 mt-3 ${size ? 'expanded' : 'minified'}`">
     <div class="sellingPointInitials ">
       <span class="text-uppercase white--text font-weight-black">{{
         expenseToShow.sellingPoint.initials
@@ -11,9 +11,9 @@
 
     <div
       :class="
-        `expenseSum text-h4 font-weight-bold ${
+        `expenseSum font-weight-bold ${
           expenseToShow.sum < 0 ? 'error--text' : 'success--text'
-        }  ${size ? 'text-center' : 'text-right'}`
+        }  ${size ? 'text-center text-h1' : 'text-right text-h4'}`
       "
     >
       {{ expenseToShow.sum }}
@@ -40,18 +40,26 @@
     </div>
 
     <div v-if="size" class="receiptsImages">
+      <span
+        class=" text-overline secondary--text text--lighten-3 font-weight-black"
+        >Receipts</span
+      >
       <v-img
         v-for="(image, index) in expenseToShow.images"
         :key="index"
-        class="mb-3 rounded-lg"
+        class="mt-3 rounded-lg"
         :src="image.url"
       />
     </div>
-    <div v-if="size" class="comments">
+    <div v-if="size" class="comments ">
+      <span
+        class="text-overline secondary--text text--lighten-3 font-weight-black"
+        >Comments</span
+      >
       <v-card
         v-for="(comment, index) in expenseToShow.comments"
         :key="index"
-        class="rounded-lg mb-3 pa-0"
+        class="rounded-lg mt-3 pa-0"
         outlined
         tile
       >

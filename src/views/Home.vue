@@ -1,31 +1,35 @@
 <template>
-  <div id="container">
-    <div :class="`budgetLeftContainer elevation-1 ${budgetContainerSize}`">
-      <span
-        v-if="budgetContainerSize === 'minified' ? false : true"
-        class="text-overline white--text ma-0"
+  <div id="homeContainer">
+    <div
+      :class="`budgetLeftContainer elevation-1 `"
+      :style="`height:${budgetContainerHeight}px`"
+    >
+      <span v-if="showBudgetLeftCaption" class="text-overline white--text ma-0"
         >Budget Left</span
       >
       <p
         :class="
           `font-weight-bold white--text mb-0 budgetShadow ${
-            budgetContainerSize === 'minified' ? 'text-h4' : 'text-h1'
+            showBudgetLeftCaption ? '' : 'my-3'
           }`
+        "
+        :style="
+          `font-size:${budgetLeftFontSize}px; line-height:${budgetLeftFontSize}px`
         "
       >
         + 10000
       </p>
     </div>
     <div
-      :class="
-        `expensesContainer pb-8 ${
-          budgetContainerSize === 'expanded'
-            ? 'expensesPaddingTopWhenBugetLeftExpanded'
-            : 'expensesPaddingTopWhenBugetLeftMinified'
-        }`
-      "
+      class="expensesContainer"
+      :style="`margin-top: ${topMarginExpensesContainer}px`"
     >
-      <div class="pa-3">
+      <div class="px-3 pt-3 pb-14">
+        <Expenses />
+        <Expenses />
+        <Expenses />
+        <Expenses />
+        <Expenses />
         <Expenses />
         <Expenses />
         <Expenses />
@@ -49,7 +53,17 @@ export default {
     return {
       scrolledFromTop: 0,
       budgetContainerSize: "expanded",
+      budgetContainerHeight: 130,
+      maxBudgetContainerHeight: 130,
+      budgetLeftFontSize: 86,
+      maxBudgetLeftFontSize: 86,
+      topMarginExpensesContainer: 130,
     };
+  },
+  computed: {
+    showBudgetLeftCaption() {
+      return this.budgetContainerHeight <= 70 ? false : true;
+    },
   },
   created() {
     // add event listener for scrolling
@@ -61,7 +75,31 @@ export default {
   },
   methods: {
     handleScroll() {
-      if (window.scrollY >= 5) {
+      this.budgetContainerHeight =
+        this.maxBudgetContainerHeight - window.scrollY;
+
+      this.budgetLeftFontSize = this.maxBudgetLeftFontSize - window.scrollY;
+
+      this.topMarginExpensesContainer =
+        this.maxBudgetContainerHeight - window.screenY;
+
+      // check if under 50 if so set back to 50 as minimum
+      if (this.budgetContainerHeight < 55) this.budgetContainerHeight = 55;
+
+      if (this.budgetContainerHeight > this.maxBudgetContainerHeight)
+        this.budgetContainerHeight = this.maxBudgetContainerHeight;
+
+      if (this.topMarginExpensesContainer < 0)
+        this.topMarginExpensesContainer = 0;
+
+      if (this.budgetLeftFontSize < 34) this.budgetLeftFontSize = 34;
+      if (this.budgetLeftFontSize > this.maxBudgetLeftFontSize)
+        this.budgetLeftFontSize = this.maxBudgetLeftFontSize;
+
+      console.log("height ", this.budgetContainerHeight);
+      console.log("font ", this.budgetLeftFontSize);
+
+      if (window.scrollY >= 0) {
         this.budgetContainerSize = "minified";
       } else {
         this.budgetContainerSize = "expanded";
@@ -72,32 +110,24 @@ export default {
 </script>
 
 <style scoped>
-#container {
-  height: 100%;
+#homeContainer {
+  background: #eff0f6;
 }
+
 .budgetLeftContainer {
   background: linear-gradient(123.87deg, #00ba88 0%, #d0e586 100%);
-
   width: 100%;
   position: fixed;
   top: 0;
-  transition-timing-function: ease-in-out;
-  transition: height 500ms, padding 500ms;
   z-index: 100;
+}
+
+.specialHeight {
+  font-size: 5em;
 }
 
 .budgetShadow {
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
-}
-
-.expanded {
-  height: 160px;
-  padding: 15px 0;
-}
-
-.minified {
-  height: 55px;
-  padding: 6px 0;
 }
 
 .expensesPaddingTopWhenBugetLeftExpanded {
@@ -110,7 +140,6 @@ export default {
 
 .expensesContainer {
   background: #eff0f6;
-  height: 100%;
 }
 
 .text-h4 {
