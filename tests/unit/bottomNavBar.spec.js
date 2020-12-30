@@ -7,12 +7,12 @@ import BottomNavBar from "@/components/BottomNavBar.vue";
 const icons = {
   home: "mdi-home-outline",
   analytics: "mdi-chart-arc",
-  history: "mdi-calendar-range",
+  history: "mdi-calendar",
   settings: "mdi-cog-outline",
 };
 
 describe("BottomNavbar.vue", () => {
-  it("should render the navbar component with the right icons and the home item should be active", () => {
+  it("should render the navbar component with the correct icons", () => {
     const $route = {
       path: "/home",
     };
@@ -23,33 +23,51 @@ describe("BottomNavbar.vue", () => {
       },
     });
 
-    const nav = wrapper.find("#navbarWrapper");
+    const nav = wrapper.find("#container");
 
-    const navItems = wrapper.findAll(".linkWrapper");
+    const homeIcon = wrapper.find("#homeIcon");
+    const analyticsIcon = wrapper.find("#analyticsIcon");
+    const historyIcon = wrapper.find("#historyIcon");
+    const settingsIcon = wrapper.find("#settingsIcon");
 
     // component is rendered
     expect(nav.exists()).toBe(true);
 
-    // linkWrapper existing
-    expect(navItems.at(0).exists()).toBe(true);
-    expect(navItems.at(1).exists()).toBe(true);
-    expect(navItems.at(2).exists()).toBe(true);
-    expect(navItems.at(3).exists()).toBe(true);
-
-    // only the home element border should be active
-    expect(navItems.at(0).html()).toMatch(/borderActive/gi);
-    expect(navItems.at(1).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(2).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(3).html()).toMatch(/borderInactive/gi);
-
-    // right icons
-    expect(navItems.at(0).text()).toMatch(icons.home);
-    expect(navItems.at(1).text()).toMatch(icons.analytics);
-    expect(navItems.at(2).text()).toMatch(icons.history);
-    expect(navItems.at(3).text()).toMatch(icons.settings);
+    // check icons
+    expect(homeIcon.text()).toBe(icons.home);
+    expect(analyticsIcon.text()).toBe(icons.analytics);
+    expect(historyIcon.text()).toBe(icons.history);
+    expect(settingsIcon.text()).toBe(icons.settings);
   });
 
-  it("should display the analytics item as active if the route is /analytics", () => {
+  it("should dispaly home as active and the slider should be over home if the route is /home, the other links shouldn't be active", () => {
+    const $route = {
+      path: "/home",
+    };
+
+    const wrapper = shallowMount(BottomNavBar, {
+      mocks: {
+        $route,
+      },
+    });
+
+    const slider = wrapper.find(".slider");
+    const homeIcon = wrapper.find("#homeIcon");
+    const analyticsIcon = wrapper.find("#analyticsIcon");
+    const historyIcon = wrapper.find("#historyIcon");
+    const settingsIcon = wrapper.find("#settingsIcon");
+
+    // Slider should stay over home
+    expect(slider.classes()).toContain("sliderMoveToHome");
+
+    // check icon colors
+    expect(homeIcon.attributes().color).toBe("primary");
+    expect(analyticsIcon.attributes().color).toBe("");
+    expect(historyIcon.attributes().color).toBe("");
+    expect(settingsIcon.attributes().color).toBe("");
+  });
+
+  it("should dispaly analytics as active and the slider should be over home if the route is /anaylics, the other links shouldn't be active", () => {
     const $route = {
       path: "/analytics",
     };
@@ -60,18 +78,23 @@ describe("BottomNavbar.vue", () => {
       },
     });
 
-    const nav = wrapper.find("#navbarWrapper");
+    const slider = wrapper.find(".slider");
+    const homeIcon = wrapper.find("#homeIcon");
+    const analyticsIcon = wrapper.find("#analyticsIcon");
+    const historyIcon = wrapper.find("#historyIcon");
+    const settingsIcon = wrapper.find("#settingsIcon");
 
-    const navItems = wrapper.findAll(".linkWrapper");
+    // Slider should stay over home
+    expect(slider.classes()).toContain("sliderMoveToAnalytics");
 
-    // only the home element border should be active
-    expect(navItems.at(0).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(1).html()).toMatch(/borderActive/gi);
-    expect(navItems.at(2).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(3).html()).toMatch(/borderInactive/gi);
+    // check icon colors
+    expect(homeIcon.attributes().color).toBe("");
+    expect(analyticsIcon.attributes().color).toBe("primary");
+    expect(historyIcon.attributes().color).toBe("");
+    expect(settingsIcon.attributes().color).toBe("");
   });
 
-  it("should display the history item as active if the route is /history", () => {
+  it("should dispaly history as active and the slider should be over home if the route is /anaylics, the other links shouldn't be active", () => {
     const $route = {
       path: "/history",
     };
@@ -82,18 +105,23 @@ describe("BottomNavbar.vue", () => {
       },
     });
 
-    const nav = wrapper.find("#navbarWrapper");
+    const slider = wrapper.find(".slider");
+    const homeIcon = wrapper.find("#homeIcon");
+    const analyticsIcon = wrapper.find("#analyticsIcon");
+    const historyIcon = wrapper.find("#historyIcon");
+    const settingsIcon = wrapper.find("#settingsIcon");
 
-    const navItems = wrapper.findAll(".linkWrapper");
+    // Slider should stay over home
+    expect(slider.classes()).toContain("sliderMoveToHistory");
 
-    // only the home element border should be active
-    expect(navItems.at(0).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(1).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(2).html()).toMatch(/borderActive/gi);
-    expect(navItems.at(3).html()).toMatch(/borderInactive/gi);
+    // check icon colors
+    expect(homeIcon.attributes().color).toBe("");
+    expect(analyticsIcon.attributes().color).toBe("");
+    expect(historyIcon.attributes().color).toBe("primary");
+    expect(settingsIcon.attributes().color).toBe("");
   });
 
-  it("should display the settings item as active if the route is /settings", () => {
+  it("should dispaly settings as active and the slider should be over home if the route is /anaylics, the other links shouldn't be active", () => {
     const $route = {
       path: "/settings",
     };
@@ -104,23 +132,27 @@ describe("BottomNavbar.vue", () => {
       },
     });
 
-    const nav = wrapper.find("#navbarWrapper");
+    const slider = wrapper.find(".slider");
+    const homeIcon = wrapper.find("#homeIcon");
+    const analyticsIcon = wrapper.find("#analyticsIcon");
+    const historyIcon = wrapper.find("#historyIcon");
+    const settingsIcon = wrapper.find("#settingsIcon");
 
-    const navItems = wrapper.findAll(".linkWrapper");
+    // Slider should stay over home
+    expect(slider.classes()).toContain("sliderMoveToSettings");
 
-    // only the home element border should be active
-    expect(navItems.at(0).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(1).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(2).html()).toMatch(/borderInactive/gi);
-    expect(navItems.at(3).html()).toMatch(/borderActive/gi);
+    // check icon colors
+    expect(homeIcon.attributes().color).toBe("");
+    expect(analyticsIcon.attributes().color).toBe("");
+    expect(historyIcon.attributes().color).toBe("");
+    expect(settingsIcon.attributes().color).toBe("primary");
   });
 
-  it("should set the home item as active if the home btn is clicked and the route was not home already", async () => {
-    const $route = {
-      path: "/settings",
+  it("should move the slider accordingly to the route after a click on an item in the navbar - home to settings", async () => {
+    let $route = {
+      path: "/home",
     };
-
-    let $router = [];
+    const $router = [];
 
     const wrapper = shallowMount(BottomNavBar, {
       mocks: {
@@ -129,19 +161,44 @@ describe("BottomNavbar.vue", () => {
       },
     });
 
-    const home = wrapper.find("#home");
+    const slider = wrapper.find(".slider");
 
-    expect(home.exists()).toBeTruthy();
+    // Slider should stay over home
+    expect(slider.classes()).toContain("sliderMoveToHome");
 
-    // class should be borderInactive
-    expect(home.html()).toMatch(/borderInactive/gi);
+    // click on settings simulated with change of route because with a fake $router it cant be tested
+    $route.path = "/settings";
 
-    // click on home
-    home.trigger("click");
-    // wait for new render
+    // wait for rendring
     await Vue.nextTick();
 
-    // border should be active
-    expect(home.html()).toMatch(/borderActive/gi);
+    // slider should stay over settings now
+    expect(slider.classes()).toContain("sliderMoveToSettings");
+  });
+
+  it("should change the router accordingly to the item which is clicked on - home to settings", async () => {
+    let $route = {
+      path: "/home",
+    };
+    const $router = [];
+
+    const wrapper = shallowMount(BottomNavBar, {
+      mocks: {
+        $route,
+        $router,
+      },
+    });
+
+    expect($router.length).toBe(0);
+
+    const settings = wrapper.find(".settings");
+
+    await settings.trigger("click");
+
+    // wait for rendring
+    await Vue.nextTick();
+
+    expect($router.length).toBe(1);
+    expect($router[0]).toBe("settings");
   });
 });
