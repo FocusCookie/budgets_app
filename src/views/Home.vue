@@ -60,8 +60,7 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
-    handleScroll(e) {
-      console.log(e);
+    handleScroll() {
       if (window.scrollY >= 5) {
         this.budgetContainerSize = "minified";
       } else {
@@ -78,7 +77,7 @@ export default {
 }
 .budgetLeftContainer {
   background: linear-gradient(123.87deg, #00ba88 0%, #d0e586 100%);
-  border-radius: 0 0 14px 14px;
+
   width: 100%;
   position: fixed;
   top: 0;
