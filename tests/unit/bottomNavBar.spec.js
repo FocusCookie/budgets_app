@@ -11,7 +11,15 @@ const icons = {
   settings: "mdi-cog-outline",
 };
 
+const spyScrollTo = jest.fn();
+
 describe("BottomNavbar.vue", () => {
+  beforeEach(() => {
+    Object.defineProperty(global.window, "scrollTo", { value: spyScrollTo });
+    Object.defineProperty(global.window, "scrollY", { value: 1 });
+    spyScrollTo.mockClear();
+  });
+
   it("should render the navbar component with the correct icons", () => {
     const $route = {
       path: "/home",
@@ -20,6 +28,7 @@ describe("BottomNavbar.vue", () => {
     const wrapper = shallowMount(BottomNavBar, {
       mocks: {
         $route,
+        window,
       },
     });
 
@@ -200,5 +209,33 @@ describe("BottomNavbar.vue", () => {
 
     expect($router.length).toBe(1);
     expect($router[0]).toBe("settings");
+  });
+
+  it("should scroll to top after a route change with the navbar", async () => {
+    let $route = {
+      path: "/home",
+    };
+    const $router = [];
+
+    const wrapper = shallowMount(BottomNavBar, {
+      mocks: {
+        $route,
+        $router,
+      },
+    });
+
+    expect($router.length).toBe(0);
+
+    const settings = wrapper.find(".settings");
+
+    await settings.trigger("click");
+
+    // wait for rendring
+    await Vue.nextTick();
+
+    expect($router.length).toBe(1);
+    expect($router[0]).toBe("settings");
+
+    expect(spyScrollTo).toBeCalled();
   });
 });
