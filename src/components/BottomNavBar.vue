@@ -77,6 +77,9 @@ export default {
   },
   methods: {
     setLinkTo(route) {
+      // scroll to top after a page change
+      window.scrollTo(0, 0);
+
       // only push if the route is not already shown
       if (this.$route.path.slice(1) !== route) this.$router.push(route);
     },
@@ -108,7 +111,7 @@ export default {
   height: 4px;
   width: 25%;
   transition-timing-function: ease-in-out;
-  transition: margin-left 1s;
+  transition: margin-left 300ms;
 }
 
 .sliderMoveToHome {

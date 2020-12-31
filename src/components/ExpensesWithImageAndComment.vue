@@ -1,41 +1,89 @@
 <template>
-  <div id="container" class="pa-3 my-3 ">
+  <div id="container" :class="`pa-3 my-3 ${size ? 'expanded' : 'minified'}`">
     <div class="sellingPointInitials ">
       <span class="text-uppercase white--text font-weight-black">{{
         expenseToShow.sellingPoint.initials
       }}</span>
     </div>
-
     <div class="sellingPointIcon">
       <span class="text-h5">{{ expenseToShow.sellingPoint.icon }}</span>
     </div>
 
-    <div class="sellingPointCategoryAndName text-left">
+    <div
+      :class="
+        `expenseSum font-weight-bold ${
+          expenseToShow.sum < 0 ? 'error--text' : 'success--text'
+        }  ${size ? 'text-center text-h1' : 'text-right text-h4'}`
+      "
+    >
+      {{ expenseToShow.sum }}
+    </div>
+    <div class="moreBtn text-right">
+      <v-btn fab dark small color="primary" outlined @click="toogleSize">
+        <v-icon dark>
+          {{ size ? "mdi-chevron-up" : "mdi-chevron-down" }}
+        </v-icon>
+      </v-btn>
+    </div>
+
+    <div v-if="size" class="sellingPointCategoryAndName text-left">
       <span
         class="text-overline pa-0 mb-0  font-weight-bold secondary--text text--lighten-2"
         >{{ expenseToShow.sellingPoint.category }}
       </span>
       <p
+        v-if="size"
         class="sellingPointName text-body-4 text-uppercase font-weight-bold pa-0 ma-0"
       >
         {{ expenseToShow.sellingPoint.name }}
       </p>
     </div>
 
-    <div class="moreBtn text-center">
-      <v-btn outlined dark fab x-small color="secondary" @click="emitEdit">
-        <v-icon small dark>
-          mdi-pen
-        </v-icon>
-      </v-btn>
+    <div v-if="size" class="receiptsImages">
+      <span
+        class=" text-overline secondary--text text--lighten-3 font-weight-black"
+        >Receipts</span
+      >
+      <v-img
+        v-for="(image, index) in expenseToShow.images"
+        :key="index"
+        class="mt-3 rounded-lg"
+        :src="image.url"
+      />
     </div>
+    <div v-if="size" class="comments ">
+      <span
+        class="text-overline secondary--text text--lighten-3 font-weight-black"
+        >Comments</span
+      >
+      <v-card
+        v-for="(comment, index) in expenseToShow.comments"
+        :key="index"
+        class="rounded-lg mt-3 pa-0"
+        outlined
+        tile
+      >
+        <v-card-text
+          :class="
+            `pa-3 text-body-1 font-italic ${
+              index % 2 == 0 ? 'text-right' : 'text-left'
+            }`
+          "
+        >
+          {{ comment.comment }}
+        </v-card-text>
 
-    <div
-      class="
-        expenseSum font-weight-bold text-right text-h2 secondary--text
-      "
-    >
-      {{ expenseToShow.sum }} €
+        <v-card-actions class="px-3 py-0">
+          <v-spacer v-if="index % 2 == 0" />
+          <span class="text-overline mr-3">{{ comment.user.name }}</span>
+
+          <v-list-item-avatar color="grey darken-3">
+            <v-img alt="" :src="comment.user.avatar" />
+          </v-list-item-avatar>
+
+          <v-spacer v-if="index % 2 != 0" />
+        </v-card-actions>
+      </v-card>
     </div>
   </div>
 </template>
@@ -46,9 +94,10 @@ export default {
   props: ["expense"],
   data() {
     return {
+      size: false,
       devExpense: {
         dateCreated: new Date(),
-        sum: 24.65,
+        sum: -24.65,
         type: "spontaneous",
         sellingPoint: {
           name: "Alnatura",
@@ -90,8 +139,8 @@ export default {
     }
   },
   methods: {
-    emitEdit() {
-      this.$emit("edit", this.expenseToShow);
+    toogleSize() {
+      this.size = !this.size;
     },
   },
 };
@@ -107,27 +156,29 @@ export default {
   background: #fcfcfc;
   border-radius: 14px;
   display: grid;
-  grid-template-rows: 40px auto;
-  grid-template-columns: 40px 24px 4fr 40px;
-  grid-template-areas:
-    "sellingPointInitials sellingPointIcon sellingPointCategoryAndName moreBtn"
-    "expenseSum expenseSum expenseSum expenseSum";
   width: 100%;
   column-gap: 10px;
   row-gap: 10px;
 }
 
+.minified {
+  grid-template-rows: 40px;
+  grid-template-columns: 40px 24px 4fr 40px;
+  grid-template-areas: "sellingPointInitials sellingPointIcon expenseSum moreBtn";
+}
+
+.expanded {
+  grid-template-rows: 40px auto auto auto;
+  grid-template-columns: 40px 24px 4fr 40px;
+  grid-template-areas:
+    "sellingPointInitials sellingPointIcon sellingPointCategoryAndName moreBtn"
+    "expenseSum expenseSum expenseSum expenseSum"
+    "receiptsImages receiptsImages receiptsImages receiptsImages"
+    "comments comments comments comments";
+}
+
 .expenseSum {
   grid-area: expenseSum;
-}
-
-.edit {
-  grid-area: edit;
-}
-
-.moreBtn {
-  grid-area: moreBtn;
-  align-self: center;
 }
 
 .sellingPointInitials {
