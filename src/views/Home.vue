@@ -7,7 +7,7 @@
       style="list-style-type:none;"
     >
       <li v-for="(item, index) in items" :key="index">
-        <Expenses />
+        <Expenses :expense="devExpense" />
       </li>
     </transition-group>
   </div>
@@ -26,6 +26,17 @@ export default {
     return {
       items: [],
       itemsData: [1, 2, 3, 4, 5, 6, 7, 8],
+      devExpense: {
+        dateCreated: new Date(),
+        sum: 24.65,
+        type: "spontaneous",
+        sellingPoint: {
+          name: "DEV Alnatura",
+          initials: "AN",
+          icon: "🛒",
+          category: "food groceries",
+        },
+      },
     };
   },
   computed: {},

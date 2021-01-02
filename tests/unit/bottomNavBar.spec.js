@@ -11,6 +11,7 @@ const icons = {
   settings: "mdi-cog-outline",
 };
 
+// Necessary becausse after every click and route change the window will be scrolled to the top
 const spyScrollTo = jest.fn();
 
 describe("BottomNavbar.vue", () => {

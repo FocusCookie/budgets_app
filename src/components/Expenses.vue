@@ -1,29 +1,37 @@
 <template>
-  <div id="container" class="pa-3 my-3 ">
+  <div id="expensesContainer" class="pa-3 my-3 ">
     <div class="sellingPointInitials ">
       <span class="text-uppercase white--text font-weight-black">{{
-        expenseToShow.sellingPoint.initials
+        expense.sellingPoint.initials
       }}</span>
     </div>
 
     <div class="sellingPointIcon">
-      <span class="text-h5">{{ expenseToShow.sellingPoint.icon }}</span>
+      <span class="text-h5">{{ expense.sellingPoint.icon }}</span>
     </div>
 
     <div class="sellingPointCategoryAndName text-left">
       <span
-        class="text-overline pa-0 mb-0  font-weight-bold secondary--text text--lighten-2"
-        >{{ expenseToShow.sellingPoint.category }}
+        class="sellingPointCategory text-overline pa-0 mb-0  font-weight-bold secondary--text text--lighten-2"
+        >{{ expense.sellingPoint.category }}
       </span>
       <p
         class="sellingPointName text-body-4 text-uppercase font-weight-bold pa-0 ma-0"
       >
-        {{ expenseToShow.sellingPoint.name }}
+        {{ expense.sellingPoint.name }}
       </p>
     </div>
 
     <div class="moreBtn text-center">
-      <v-btn outlined dark fab x-small color="secondary" @click="emitEdit">
+      <v-btn
+        id="editBtn"
+        outlined
+        dark
+        fab
+        x-small
+        color="secondary"
+        @click="emitEdit"
+      >
         <v-icon small dark>
           mdi-pen
         </v-icon>
@@ -35,7 +43,7 @@
         expenseSum font-weight-bold text-right text-h2 secondary--text
       "
     >
-      {{ expenseToShow.sum }} €
+      {{ expense.sum }} €
     </div>
   </div>
 </template>
@@ -45,53 +53,13 @@ export default {
   name: "Expenses",
   props: ["expense"],
   data() {
-    return {
-      devExpense: {
-        dateCreated: new Date(),
-        sum: 24.65,
-        type: "spontaneous",
-        sellingPoint: {
-          name: "Alnatura",
-          initials: "AN",
-          icon: "🛒",
-          category: "food groceries",
-        },
-
-        comments: [
-          {
-            user: {
-              name: "Stephan",
-              avatar: "https://cdn.vuetifyjs.com/images/lists/2.jpg",
-            },
-            comment: "Super teuer dieses mal",
-          },
-          {
-            user: {
-              name: "Theresa",
-              avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-            },
-            comment: "Ich glaube die Milch ist teurer geworden",
-          },
-        ],
-        images: [
-          { url: "https://media.giphy.com/media/67ThRZlYBvibtdF9JH/giphy.gif" },
-          { url: "https://media.giphy.com/media/xTiTnqUxyWbsAXq7Ju/giphy.gif" },
-        ],
-      },
-      expenseToShow: null,
-    };
+    return {};
   },
   computed: {},
-  created() {
-    if (!this.expense) {
-      this.expenseToShow = this.devExpense;
-    } else {
-      this.expenseToShow = this.expense;
-    }
-  },
+  created() {},
   methods: {
     emitEdit() {
-      this.$emit("edit", this.expenseToShow);
+      this.$emit("edit", this.expense);
     },
   },
 };
@@ -103,7 +71,7 @@ export default {
   --main-minified-item-height: 40px;
 }
 
-#container {
+#expensesContainer {
   background: #fcfcfc;
   border-radius: 14px;
   display: grid;
