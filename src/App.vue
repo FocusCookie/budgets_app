@@ -4,7 +4,10 @@
       <span class="text-overline primary--text">Tresorname</span>
     </div>
     <div id="content">
-      <router-view />
+      <!-- use a dynamic transition name -->
+      <transition name="router-view-fade" mode="out-in">
+        <router-view />
+      </transition>
     </div>
     <div id="nav">
       <BottomNavBar />
@@ -64,5 +67,14 @@ export default {
   border-top: 1px solid #d6d8e7;
   padding: 0 15px;
   z-index: 100;
+}
+
+.router-view-fade-enter-active,
+.router-view-fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.router-view-fade-enter, .router-view-fade-leave-to
+/* .component-fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
