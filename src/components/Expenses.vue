@@ -1,6 +1,6 @@
 <template>
   <div id="expensesContainer" class="pa-3 my-3 ">
-    <div class="sellingPointInitials ">
+    <div :class="`sellingPointInitials ${expense.sellingPoint.color}`">
       <span class="text-uppercase white--text font-weight-black">{{
         expense.sellingPoint.initials
       }}</span>
@@ -43,7 +43,7 @@
         expenseSum font-weight-bold text-right text-h2 secondary--text
       "
     >
-      {{ expense.sum }} €
+      {{ expense.sum.toFixed(2) }} €
     </div>
   </div>
 </template>
@@ -100,7 +100,6 @@ export default {
 
 .sellingPointInitials {
   align-self: center;
-  background: red;
   border-radius: 4px;
   grid-area: sellingPointInitials;
   height: var(--main-minified-item-height);

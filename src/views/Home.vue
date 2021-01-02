@@ -1,54 +1,143 @@
 <template>
-  <div id="homeContainer" class="px-3 py-1">
-    <transition-group
-      name="list"
-      tag="ul"
-      class="pa-0"
-      style="list-style-type:none;"
-    >
-      <li v-for="(item, index) in items" :key="index">
-        <Expenses :expense="devExpense" />
-      </li>
-    </transition-group>
+  <div id="homeContainer" class="py-1">
+    <div id="expensesContainer">
+      <div :class="typeToShow !== 'monthly' ? 'slide' : 'slide toMonthly'">
+        <div
+          :class="typeToShow !== 'monthly' ? 'list px-3' : 'list px-3 fadeOut'"
+        >
+          <transition-group name="list" tag="div">
+            >
+            <Expenses
+              v-for="expense in spontaneousExpenses"
+              :key="`${expense.name}-${expense.dateCreated}`"
+              :expense="expense"
+              class="list-item"
+            />
+          </transition-group>
+        </div>
+        <div class="list px-3">
+          <transition-group name="list" tag="div">
+            >
+            <Expenses
+              v-for="expense in monthlyExpenses"
+              :key="`${expense.name}-${expense.dateCreated}`"
+              :expense="expense"
+              class="list-item"
+            />
+          </transition-group>
+        </div>
+      </div>
+    </div>
+    <div id="expensesMenuBarContainer">
+      <ExpensesMenuBar
+        @typeChange="toggleExpensesTypeToShow"
+        @addExpense="pushExpense"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import ExpensesMenuBar from "@/components/ExpensesMenuBar";
 import Expenses from "@/components/Expenses";
 
 export default {
   name: "Home",
   components: {
+    ExpensesMenuBar,
     Expenses,
   },
   data() {
     return {
-      items: [],
-      itemsData: [1, 2, 3, 4, 5, 6, 7, 8],
-      devExpense: {
-        dateCreated: new Date(),
-        sum: 24.65,
-        type: "spontaneous",
-        sellingPoint: {
-          name: "DEV Alnatura",
-          initials: "AN",
-          icon: "🛒",
-          category: "food groceries",
+      typeToShow: "spontaneous",
+      expenses: null,
+      devExpenses: [
+        {
+          dateCreated: "20:01:52",
+          sum: 24.65,
+          type: "spontaneous",
+          sellingPoint: {
+            name: "DEV Alnatura",
+            initials: "AN",
+            icon: "🛒",
+            category: "food groceries",
+            color: "primary",
+          },
         },
-      },
+        {
+          dateCreated: "20:33:50",
+          sum: 14.99,
+          type: "monthly",
+          sellingPoint: {
+            name: "DEV Netflix",
+            initials: "NF",
+            icon: "📽",
+            category: "movie streaming",
+            color: "secondary",
+          },
+        },
+        {
+          dateCreated: "20:34:52",
+          sum: 11.44,
+          type: "spontaneous",
+          sellingPoint: {
+            name: "DEV REWE",
+            initials: "RW",
+            icon: "🛒",
+            category: "food groceries",
+            color: "success",
+          },
+        },
+        {
+          dateCreated: "20:53:52",
+          sum: 14.99,
+          type: "monthly",
+          sellingPoint: {
+            name: "DEV Amazon Prime",
+            initials: "AM",
+            icon: "📽",
+            category: "movie streaming",
+            color: "error",
+          },
+        },
+      ],
+      toggleNew: true,
     };
   },
-  computed: {},
+  computed: {
+    monthlyExpenses() {
+      return this.expenses.filter(expense => expense.type === "monthly");
+    },
+    spontaneousExpenses() {
+      return this.expenses.filter(expense => expense.type === "spontaneous");
+    },
+  },
   created() {
-    const self = this;
+    // only for dev, delete after dev
+    if (!this.expenses) this.expenses = this.devExpenses;
 
-    let interval = setInterval(function() {
-      self.items.push(2);
-      if (self.items.length >= self.itemsData.length) {
-        clearInterval(interval);
-      }
-    }, 40);
+    this.nextNum = this.expenses.length;
+  },
+  methods: {
+    toggleExpensesTypeToShow(type) {
+      if (this.typeToShow !== type) this.typeToShow = type;
+    },
+    pushExpense() {
+      this.expenses.unshift({
+        dateCreated: new Date(),
+        sum: 24 + Math.random(),
+        type: this.toggleNew ? "monthly" : "spontaneous",
+        sellingPoint: {
+          name: "DEV NEW",
+          initials: "NW",
+          icon: "🛒",
+          category: "food groceries",
+          color: "primary",
+        },
+      });
+      this.toggleNew = !this.toggleNew;
+    },
   },
 };
 </script>
@@ -56,6 +145,45 @@ export default {
 <style scoped>
 #homeContainer {
   background: #eff0f6;
+  height: 100%;
+}
+
+#expensesMenuBarContainer {
+  position: fixed;
+  bottom: 44px;
+  width: 100%;
+}
+
+#expensesContainer {
+  overflow-x: hidden;
+  margin-bottom: 55px; /* the expenses menu bar is at the bottom so needs to be scrolled over the menu */
+  width: 100%;
+}
+
+.slide {
+  width: 200%;
+  -webkit-transition: all 300ms ease-in-out;
+  -moz-transition: all 300ms ease-in-out;
+  -o-transition: all 300ms ease-in-out;
+  transition: all 300ms ease-in-out;
+}
+
+.list {
+  width: 50%;
+  float: left;
+  opacity: 100;
+  -webkit-transition: all 300ms ease-in-out;
+  -moz-transition: all 300ms ease-in-out;
+  -o-transition: all 300ms ease-in-out;
+  transition: all 300ms ease-in-out;
+}
+
+.fadeOut {
+  opacity: 0;
+}
+
+.toMonthly {
+  transform: translateX(-50%);
 }
 
 .list-item {
@@ -63,11 +191,12 @@ export default {
   margin-right: 10px;
 }
 .list-enter-active,
-.list-leave-active {
-  transition: all 300ms;
+.list-leave-active,
+.list-leave-to {
+  transition: all 1s;
 }
-.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+.list-enter  /* .list-leave-active below version 2.1.8 */ {
   opacity: 0;
-  transform: translateX(-400px) opacity(100);
+  transform: translateX(300px);
 }
 </style>
