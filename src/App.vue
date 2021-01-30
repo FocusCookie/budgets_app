@@ -1,27 +1,41 @@
 <template>
   <v-app light>
-    <div id="vault" class="text-center">
-      <span class="text-overline primary--text">Tresorname</span>
-    </div>
-    <div id="content">
-      <!-- use a dynamic transition name -->
-      <transition name="router-view-fade" mode="out-in">
-        <router-view />
-      </transition>
-    </div>
-    <div id="nav">
-      <BottomNavBar />
+    <v-container v-if="!loggedIn">
+      <Login />
+    </v-container>
+
+    <div v-if="loggedIn">
+      <div id="vault" class="text-center">
+        <span class="text-overline primary--text">Tresorname</span>
+      </div>
+
+      <div id="content">
+        <!-- use a dynamic transition name -->
+        <transition name="router-view-fade" mode="out-in">
+          <router-view />
+        </transition>
+      </div>
+
+      <div id="nav">
+        <BottomNavBar />
+      </div>
     </div>
   </v-app>
 </template>
 
 <script>
 import BottomNavBar from "./components/BottomNavBar";
+import Login from "./components/Login.vue";
 
 export default {
   name: "Budgets",
-  components: { BottomNavBar },
+  components: { BottomNavBar, Login },
   props: {},
+  computed: {
+    loggedIn() {
+      return this.$store.getters["auth/loggedIn"];
+    },
+  },
 };
 </script>
 
@@ -36,9 +50,7 @@ export default {
 }
 
 #content {
-  height: 100%;
-  margin-top: 40px;
-  padding-bottom: 40px;
+  padding-top: 40px;
 }
 
 #vault {

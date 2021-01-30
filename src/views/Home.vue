@@ -12,6 +12,7 @@
               :key="`${expense.name}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
+              @edit="startEditingExpense(expense)"
             />
           </transition-group>
         </div>
@@ -23,6 +24,7 @@
               :key="`${expense.name}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
+              @edit="startEditingExpense(expense)"
             />
           </transition-group>
         </div>
@@ -31,9 +33,16 @@
     <div id="expensesMenuBarContainer">
       <ExpensesMenuBar
         @typeChange="toggleExpensesTypeToShow"
-        @addExpense="pushExpense"
+        @addExpense="startCreation"
       />
     </div>
+
+    <CreateExpenseDialog
+      v-if="createDialog"
+      :selling-points="sellingPoints"
+      :selling-point-categories="sellingPointCategories"
+      @cancel="cancelCreatingExpense"
+    />
   </div>
 </template>
 
@@ -41,15 +50,19 @@
 // @ is an alias to /src
 import ExpensesMenuBar from "@/components/ExpensesMenuBar";
 import Expenses from "@/components/Expenses";
+import CreateExpenseDialog from "@/components/CreateExpenseDialog";
 
 export default {
   name: "Home",
   components: {
     ExpensesMenuBar,
     Expenses,
+    CreateExpenseDialog,
   },
   data() {
     return {
+      createDialog: false,
+      editDialog: false,
       typeToShow: "spontaneous",
       expenses: null,
       devExpenses: [
@@ -103,6 +116,19 @@ export default {
         },
       ],
       toggleNew: true,
+      sellingPoints: [
+        //TODO: needs to be fetched via api
+        "Rewe",
+        "Lidl",
+        "Edeka",
+        "Amazon",
+        "OBI",
+        "Starbucks",
+        "Dönerladen",
+        "Lieferando",
+      ],
+      sellingPointCategories: ["Food", "Drinks", "Streaming"], //TODO:  needs be fetched via api
+      selectedExpenseToEdit: null,
     };
   },
   computed: {
@@ -123,7 +149,12 @@ export default {
     toggleExpensesTypeToShow(type) {
       if (this.typeToShow !== type) this.typeToShow = type;
     },
+    startCreation() {
+      this.createDialog = true;
+    },
     pushExpense() {
+      this.createDialog = true;
+
       this.expenses.unshift({
         dateCreated: new Date(),
         sum: 24 + Math.random(),
@@ -138,6 +169,26 @@ export default {
       });
       this.toggleNew = !this.toggleNew;
     },
+    createdExpense(v) {
+      this.createDialog = false;
+      console.log("CREATED ", v);
+    },
+    cancelCreatingExpense() {
+      this.createDialog = false;
+      console.log("CANCELED CRATE EXPENSE");
+    },
+    editedExpense(v) {
+      this.editDialog = false;
+      console.log("EDITED ", v);
+    },
+    cancelEditingExpense() {
+      this.editDialog = false;
+      console.log("CANCELED EDIT EXPENSE");
+    },
+    startEditingExpense(expense) {
+      this.editDialog = true;
+      this.selectedExpenseToEdit = expense;
+    },
   },
 };
 </script>
@@ -145,7 +196,6 @@ export default {
 <style scoped>
 #homeContainer {
   background: #eff0f6;
-  height: 100%;
 }
 
 #expensesMenuBarContainer {
@@ -155,8 +205,9 @@ export default {
 }
 
 #expensesContainer {
+  height: 100%;
   overflow-x: hidden;
-  margin-bottom: 55px; /* the expenses menu bar is at the bottom so needs to be scrolled over the menu */
+  margin-bottom: 95px;
   width: 100%;
 }
 
