@@ -7,7 +7,7 @@ const ApiService = {
   },
 
   checkAuthHeader() {
-    if (store.getters["auth/accessToken"] !== "") {
+    if (store.getters["auth/accessToken"]) {
       axios.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${store.getters["auth/accessToken"]}`;

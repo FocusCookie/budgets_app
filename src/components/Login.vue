@@ -90,7 +90,7 @@ export default {
           this.loadingAuthData = true;
 
           await this.$store.dispatch("auth/login", {
-            email: this.email,
+            email: this.email.toLowerCase(),
             password: this.password,
           });
 

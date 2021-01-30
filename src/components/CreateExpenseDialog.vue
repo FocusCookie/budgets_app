@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="open"
-    content-class="ma-0 rounded-0"
+    content-class="ma-0 px-3 rounded-0"
     fluid
     persistent
     transition="dialog-bottom-transition"
@@ -62,8 +62,8 @@
         >
           <span class="text-overline font-weight-bold">NEW SELLING POINT</span>
           <v-text-field
-            small
             v-model="enteredSellingPointName"
+            small
             color="primary"
             label="Name"
             placeholder="enter a name"
