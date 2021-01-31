@@ -60,6 +60,26 @@ const mutations = {
     state.accessToken = "";
     state.refreshToken = "";
   },
+
+  refreshTokensRequest(state) {
+    state.authenticating = true;
+    state.authenticationError = "";
+    state.authenticationErrorCode = 0;
+  },
+
+  refreshTokensError(state, { errorCode, errorMessage }) {
+    state.authenticating = false;
+    state.authenticationError = errorMessage;
+    state.authenticationErrorCode = errorCode;
+    state.accessToken = "";
+    state.refreshToken = "";
+  },
+
+  refreshTokensSuccess(state, tokens) {
+    state.authenticating = false;
+    state.accessToken = tokens.accessToken;
+    state.refreshToken = tokens.refreshToken;
+  },
 };
 
 const actions = {
@@ -97,7 +117,40 @@ const actions = {
       context.commit("logoutSuccess");
       router.push("/login");
     } catch (err) {
+      TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
+      context.commit("logoutSuccess");
+      router.push("/login");
       console.log(err);
+    }
+  },
+
+  refreshTokens: async context => {
+    try {
+      context.commit("refreshTokensRequest");
+
+      if (state.refreshToken) {
+        const tokens = await AuthService.refreshAccessToken(state.refreshToken);
+
+        context.commit("refreshTokensSuccess", tokens);
+
+        TokenService.saveAccessToken(tokens.accessToken);
+        TokenService.saveRefreshToken(tokens.refreshToken);
+
+        return true;
+      }
+    } catch (e) {
+      if (e.name === "RefreshTokensError") {
+        // If the refresh of the token was not possible initiate the "logout" and remove the tokens
+        TokenService.removeAccessToken();
+        TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
+
+        context.commit("refreshTokensError", {
+          errorCode: e.status,
+          errorMessage: e.message,
+        });
+      }
+
+      return false;
     }
   },
 };

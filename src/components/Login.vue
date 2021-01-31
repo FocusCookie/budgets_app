@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @keyup.enter="submit">
     <v-text-field
       v-model="email"
       :error-messages="emailErrors"

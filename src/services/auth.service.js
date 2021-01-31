@@ -1,4 +1,5 @@
 import { ApiService } from "@/services/api.service.js";
+import axios from "axios";
 
 const AuthService = {
   async login(email, password) {
@@ -30,6 +31,25 @@ const AuthService = {
         })
         .catch(err => {
           reject(err);
+        });
+    });
+  },
+
+  async refreshAccessToken(refreshToken) {
+    return new Promise((resolve, reject) => {
+      axios
+        .post(`${ApiService.getBaseUrl()}auth/refresh-tokens`, {
+          refreshToken: refreshToken,
+        })
+        .then(res => {
+          resolve(res.data);
+        })
+        .catch(err => {
+          reject({
+            name: "RefreshTokensError",
+            message: err.response.data.error.message,
+            status: err.response.status,
+          });
         });
     });
   },

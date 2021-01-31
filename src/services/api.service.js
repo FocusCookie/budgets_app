@@ -6,6 +6,10 @@ const ApiService = {
     axios.defaults.baseURL = baseURL;
   },
 
+  getBaseUrl() {
+    return axios.defaults.baseURL;
+  },
+
   checkAuthHeader() {
     if (store.getters["auth/accessToken"]) {
       axios.defaults.headers.common[
@@ -16,9 +20,29 @@ const ApiService = {
     }
   },
 
-  get(resource) {
-    this.checkAuthHeader();
-    return axios.get(resource);
+  async get(resource) {
+    try {
+      this.checkAuthHeader();
+      const response = await axios.get(resource);
+      return response.data;
+    } catch (error) {
+      if (
+        error.response.data.error.status === 401 &&
+        error.response.data.error.message === "jwt expired"
+      ) {
+        const tokensRefreshed = await store.dispatch("auth/refreshTokens");
+
+        if (tokensRefreshed) {
+          return this.get(resource);
+        } else {
+          throw {
+            name: "RefreshTokensError",
+            message:
+              "Access Token and Refresh Token expired. Please login again.",
+          };
+        }
+      }
+    }
   },
 
   post(resource, data) {
