@@ -8,6 +8,10 @@
       <v-btn class="mt-12" @click="test()">
         tesst
       </v-btn>
+      <v-text-field v-model="vaultName">
+        hallo
+      </v-text-field>
+      {{ vaultName }}
     </v-container>
   </div>
 </template>
@@ -19,11 +23,19 @@ import { ApiService } from "@/services/api.service.js";
 export default {
   name: "Settings",
   components: { Logout },
+  data() {
+    return {
+      vaultName: "",
+    };
+  },
   methods: {
     async test() {
       try {
-        const categories = await ApiService.get("categories");
-        console.log(categories);
+        const vault = await ApiService.post("vaults", {
+          name: this.vaultName,
+        });
+
+        console.log(vault);
       } catch (error) {
         console.log(error.message);
       }

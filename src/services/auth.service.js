@@ -8,8 +8,8 @@ const AuthService = {
         password: password,
         email: email,
       })
-        .then(res => {
-          resolve(res.data);
+        .then(tokens => {
+          resolve(tokens);
         })
         .catch(err => {
           reject({

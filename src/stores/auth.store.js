@@ -84,9 +84,8 @@ const mutations = {
 
 const actions = {
   login: async (context, payload) => {
-    context.commit("loginRequest");
-
     try {
+      context.commit("loginRequest");
       const tokens = await AuthService.login(payload.email, payload.password);
       context.commit("loginSuccess", tokens);
 

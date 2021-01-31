@@ -45,19 +45,81 @@ const ApiService = {
     }
   },
 
-  post(resource, data) {
-    this.checkAuthHeader();
-    return axios.post(resource, data);
+  async post(resource, data) {
+    try {
+      this.checkAuthHeader();
+      const response = await axios.post(resource, data);
+      return response.data;
+    } catch (error) {
+      if (
+        error.response.data.error.status === 401 &&
+        error.response.data.error.message === "jwt expired"
+      ) {
+        const tokensRefreshed = await store.dispatch("auth/refreshTokens");
+
+        if (tokensRefreshed) {
+          return this.post(resource, data);
+        } else {
+          throw {
+            name: "RefreshTokensError",
+            message:
+              "Access Token and Refresh Token expired. Please login again.",
+          };
+        }
+      }
+    }
   },
 
-  put(resource, data) {
-    this.checkAuthHeader();
-    return axios.put(resource, data);
+  async put(resource, data) {
+    try {
+      this.checkAuthHeader();
+      const response = await axios.put(resource, data);
+      return response.data;
+    } catch (error) {
+      if (
+        error.response.data.error.status === 401 &&
+        error.response.data.error.message === "jwt expired"
+      ) {
+        const tokensRefreshed = await store.dispatch("auth/refreshTokens");
+
+        if (tokensRefreshed) {
+          return this.put(resource, data);
+        } else {
+          throw {
+            name: "RefreshTokensError",
+            message:
+              "Access Token and Refresh Token expired. Please login again.",
+          };
+        }
+      }
+    }
   },
 
-  delete(resource, data) {
-    this.checkAuthHeader();
-    return axios.delete(resource, { data: data });
+  async delete(resource, data) {
+    try {
+      this.checkAuthHeader();
+      const response = await axios.delete(resource, { data: data });
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      if (
+        error.response.data.error.status === 401 &&
+        error.response.data.error.message === "jwt expired"
+      ) {
+        const tokensRefreshed = await store.dispatch("auth/refreshTokens");
+
+        if (tokensRefreshed) {
+          return this.delete(resource, data);
+        } else {
+          throw {
+            name: "RefreshTokensError",
+            message:
+              "Access Token and Refresh Token expired. Please login again.",
+          };
+        }
+      }
+    }
   },
 
   /**
