@@ -53,6 +53,26 @@ const AuthService = {
         });
     });
   },
+
+  async register(user) {
+    return new Promise((resolve, reject) => {
+      ApiService.post("auth/register", {
+        name: user.name,
+        password: user.password,
+        email: user.email,
+      })
+        .then(tokens => {
+          resolve(tokens);
+        })
+        .catch(err => {
+          reject({
+            name: "RegisterError",
+            message: err.response.data.error.message,
+            status: err.response.status,
+          });
+        });
+    });
+  },
 };
 
 export { AuthService };

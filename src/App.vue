@@ -2,11 +2,15 @@
   <v-app light>
     <v-container v-if="!loggedIn">
       <Login />
+
+      <br />
+
+      <Register />
     </v-container>
 
     <div v-if="loggedIn">
       <div id="vault" class="text-center">
-        <span class="text-overline primary--text">Tresorname</span>
+        <span class="text-overline primary--text">Tresorname </span>
       </div>
 
       <div id="content">
@@ -26,10 +30,11 @@
 <script>
 import BottomNavBar from "./components/BottomNavBar";
 import Login from "./components/Login.vue";
+import Register from "./components/Register.vue";
 
 export default {
   name: "Budgets",
-  components: { BottomNavBar, Login },
+  components: { BottomNavBar, Login, Register },
   props: {},
   computed: {
     loggedIn() {

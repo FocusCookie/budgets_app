@@ -1,5 +1,9 @@
 <template>
   <div id="homeContainer" class="py-1">
+    <h1 v-if="newUser">
+      Welcome 👋
+    </h1>
+
     <div id="expensesContainer">
       <div :class="typeToShow !== 'monthly' ? 'slide' : 'slide toMonthly'">
         <div
@@ -137,6 +141,9 @@ export default {
     },
     spontaneousExpenses() {
       return this.expenses.filter(expense => expense.type === "spontaneous");
+    },
+    newUser() {
+      return this.$store.getters["user/firstTimeLoggedIn"];
     },
   },
   created() {

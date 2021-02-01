@@ -42,6 +42,7 @@ const ApiService = {
           };
         }
       }
+      throw error;
     }
   },
 
@@ -67,6 +68,7 @@ const ApiService = {
           };
         }
       }
+      throw error;
     }
   },
 
@@ -92,6 +94,7 @@ const ApiService = {
           };
         }
       }
+      throw error;
     }
   },
 
@@ -119,6 +122,7 @@ const ApiService = {
           };
         }
       }
+      throw error;
     }
   },
 

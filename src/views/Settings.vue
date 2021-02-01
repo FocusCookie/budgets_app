@@ -3,22 +3,25 @@
     <h1>This is Settings</h1>
     <br />
     <v-container>
-      <Logout />
+      <p><span class="title">Name </span>{{ userName }}</p>
+      <p><span class="title">Role </span>{{ userRole }}</p>
+      <p><span class="title">Main Vault </span>{{ userMainVault }}</p>
+      <p><span class="title">User ID </span>{{ userId }}</p>
       <br />
-      <v-btn class="mt-12" @click="test()">
-        tesst
+      <Logout />
+
+      <br />
+      <v-btn @click="test()">
+        check user id
       </v-btn>
-      <v-text-field v-model="vaultName">
-        hallo
-      </v-text-field>
-      {{ vaultName }}
+      <p>{{ checkedUserID }}</p>
     </v-container>
   </div>
 </template>
 
 <script>
 import Logout from "@/components/Logout";
-import { ApiService } from "@/services/api.service.js";
+import { UserService } from "@/services/user.service.js";
 
 export default {
   name: "Settings",
@@ -26,18 +29,30 @@ export default {
   data() {
     return {
       vaultName: "",
+      checkedUserID: "",
     };
+  },
+  computed: {
+    userName() {
+      return this.$store.getters["user/name"];
+    },
+    userRole() {
+      return this.$store.getters["user/role"];
+    },
+    userMainVault() {
+      return this.$store.getters["user/mainVault"];
+    },
+    userId() {
+      return this.$store.getters["user/id"];
+    },
   },
   methods: {
     async test() {
       try {
-        const vault = await ApiService.post("vaults", {
-          name: this.vaultName,
-        });
-
-        console.log(vault);
+        const id = await UserService.getUserIdByEmail("admian@app.com");
+        this.checkedUserID = id;
       } catch (error) {
-        console.log(error.message);
+        console.log(error);
       }
     },
   },

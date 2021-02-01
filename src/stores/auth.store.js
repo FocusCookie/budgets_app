@@ -1,6 +1,7 @@
 import { AuthService } from "@/services/auth.service.js";
 import { TokenService } from "@/services/token.service";
 import router from "@/router/index";
+import { store } from "@/services/store.service.js";
 
 const state = {
   authenticating: false,
@@ -34,6 +35,14 @@ const getters = {
   refreshToken: state => {
     return state.refreshToken;
   },
+
+  userIsNew: state => {
+    return state.newlyRegisteredUser;
+  },
+
+  user: state => {
+    return state.user;
+  },
 };
 
 const mutations = {
@@ -41,6 +50,7 @@ const mutations = {
     state.authenticating = true;
     state.authenticationError = "";
     state.authenticationErrorCode = 0;
+    state.newlyRegisteredUser = false;
   },
 
   loginSuccess(state, tokens) {
@@ -80,6 +90,22 @@ const mutations = {
     state.accessToken = tokens.accessToken;
     state.refreshToken = tokens.refreshToken;
   },
+
+  registerRequest(state) {
+    state.authenticating = true;
+    state.authenticationError = "";
+    state.authenticationErrorCode = 0;
+  },
+
+  registerSuccess(state) {
+    state.authenticating = false;
+  },
+
+  registerError(state, { errorCode, errorMessage }) {
+    state.authenticating = false;
+    state.authenticationErrorCode = errorCode;
+    state.authenticationError = errorMessage;
+  },
 };
 
 const actions = {
@@ -87,7 +113,11 @@ const actions = {
     try {
       context.commit("loginRequest");
       const tokens = await AuthService.login(payload.email, payload.password);
+
       context.commit("loginSuccess", tokens);
+
+      // set the user into the store
+      await store.dispatch("user/init", { accessToken: tokens.accessToken });
 
       TokenService.saveAccessToken(tokens.accessToken);
       TokenService.saveRefreshToken(tokens.refreshToken);
@@ -144,6 +174,31 @@ const actions = {
         TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
 
         context.commit("refreshTokensError", {
+          errorCode: e.status,
+          errorMessage: e.message,
+        });
+      }
+
+      return false;
+    }
+  },
+
+  register: async (context, user) => {
+    try {
+      context.commit("registerRequest");
+      const tokens = await AuthService.register(user);
+      context.commit("registerSuccess", tokens);
+
+      // set the user into the store
+      await store.dispatch("user/init", {
+        accessToken: tokens.accessToken,
+      });
+
+      return true;
+    } catch (e) {
+      console.log(e);
+      if (e.name === "RegisterError") {
+        context.commit("registerError", {
           errorCode: e.status,
           errorMessage: e.message,
         });
