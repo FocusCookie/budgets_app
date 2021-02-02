@@ -50,6 +50,7 @@ const actions = {
         name: user.name,
         role: user.role,
         mainVault: user.mainVault,
+        email: user.email,
       });
 
       UserService.saveUser(user);
@@ -68,8 +69,9 @@ const actions = {
     context.commit("name", name);
   },
 
-  setMainVault: (context, mainVault) => {
-    context.commit("mainVault", mainVault);
+  setMainVault: (context, vault) => {
+    UserService.saveMainVault(vault);
+    context.commit("mainVault", vault);
   },
 };
 

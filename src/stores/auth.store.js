@@ -1,7 +1,9 @@
 import { AuthService } from "@/services/auth.service.js";
 import { TokenService } from "@/services/token.service";
+import { UserService } from "@/services/user.service";
 import router from "@/router/index";
 import { store } from "@/services/store.service.js";
+import { VaultService } from "../services/vault.service";
 
 const state = {
   authenticating: false,
@@ -50,7 +52,6 @@ const mutations = {
     state.authenticating = true;
     state.authenticationError = "";
     state.authenticationErrorCode = 0;
-    state.newlyRegisteredUser = false;
   },
 
   loginSuccess(state, tokens) {
@@ -143,10 +144,14 @@ const actions = {
       TokenService.removeAccessToken();
       await AuthService.logout(state.refreshToken);
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
+      UserService.removeUser(); // remove all stored user information from the localStorage
+      VaultService.local.removeVault(); // remove the vault informations form the localStorage
       context.commit("logoutSuccess");
       router.push("/login");
     } catch (err) {
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
+      UserService.removeUser(); // remove all stored user information from the localStorage
+      VaultService.local.removeVault(); // remove the vault informations form the localStorage
       context.commit("logoutSuccess");
       router.push("/login");
       console.log(err);
@@ -196,7 +201,6 @@ const actions = {
 
       return true;
     } catch (e) {
-      console.log(e);
       if (e.name === "RegisterError") {
         context.commit("registerError", {
           errorCode: e.status,

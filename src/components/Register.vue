@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div v-if="showSuccessullfyRegisteredMsg">
-      🎉 Successfully registered! Please login with your eMail and Password.
-    </div>
-
-    <form v-if="!showSuccessullfyRegisteredMsg" @keyup.enter="submit">
+    <form @keyup.enter="submit">
       <v-text-field
         v-model="name"
         :error-messages="nameErrors"
@@ -83,7 +79,6 @@ export default {
   },
   data: () => ({
     name: "",
-    showSuccessullfyRegisteredMsg: false,
     registering: false,
     password: "",
     email: "",
@@ -133,15 +128,15 @@ export default {
         ) {
           this.registering = true;
 
-          const isRegistered = await this.$store.dispatch("auth/register", {
+          await this.$store.dispatch("auth/register", {
             name: this.name,
             email: this.email.toLowerCase(),
             password: this.password,
           });
 
-          if (isRegistered) this.showSuccessullfyRegisteredMsg = true;
-
           this.registering = false;
+
+          this.$emit("registered", this.name);
         }
       } catch (err) {
         console.log(err);

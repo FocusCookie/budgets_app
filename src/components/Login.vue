@@ -47,6 +47,8 @@
 <script>
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
+import { VaultService } from "@/services/vault.service.js";
+import { UserService } from "@/services/user.service.js";
 
 export default {
   name: "Login",
@@ -59,6 +61,7 @@ export default {
     loadingAuthData: false,
     password: "",
     email: "",
+    createFirstVaultMsg: false,
   }),
   computed: {
     passwordErrors() {
@@ -93,6 +96,19 @@ export default {
             email: this.email.toLowerCase(),
             password: this.password,
           });
+
+          //check if mainVault is set
+          const mainVault = this.$store.getters["user/mainVault"];
+
+          // if no mainVault is set check if the user has access to other vaults
+          if (!mainVault) {
+            const vaults = await VaultService.api.getAll();
+
+            // if the user has access to vaults set the mainVault to the first vault
+            if (vaults.length > 0) {
+              await UserService.setMainVault(vaults[0]._id);
+            }
+          }
 
           this.loadingAuthData = false;
         }

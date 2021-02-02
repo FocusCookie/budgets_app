@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="py-3">
     <h1>This is Settings</h1>
     <br />
     <v-container>
@@ -9,19 +9,12 @@
       <p><span class="title">User ID </span>{{ userId }}</p>
       <br />
       <Logout />
-
-      <br />
-      <v-btn @click="test()">
-        check user id
-      </v-btn>
-      <p>{{ checkedUserID }}</p>
     </v-container>
   </div>
 </template>
 
 <script>
 import Logout from "@/components/Logout";
-import { UserService } from "@/services/user.service.js";
 
 export default {
   name: "Settings",
@@ -46,16 +39,7 @@ export default {
       return this.$store.getters["user/id"];
     },
   },
-  methods: {
-    async test() {
-      try {
-        const id = await UserService.getUserIdByEmail("admian@app.com");
-        this.checkedUserID = id;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-  },
+  methods: {},
 };
 </script>
 

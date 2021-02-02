@@ -4,6 +4,7 @@ const USER_ROLE = "userRole";
 const USER_MAIN_VAULT = "userMainVault";
 
 import { ApiService } from "@/services/api.service.js";
+import { store } from "@/services/store.service.js";
 
 const UserService = {
   async edit(id, name) {
@@ -18,24 +19,35 @@ const UserService = {
     return editedVault.statusCode === 204 ? true : false;
   },
 
-  async getUserIdByEmail(email) {
-    try {
-      const user = await ApiService.get(`users/email/${email}`);
+  async setMainVault(vault) {
+    await ApiService.post(`users/${this.getId()}/mainvault/${vault}`);
 
-      return user;
-    } catch (error) {
-      throw {
-        name: "GetUserIdByEmail",
-        message: error.response.data.error.message,
-      };
-    }
+    await store.dispatch("user/setMainVault", vault);
+    return true;
   },
 
   saveUser(user) {
+    const vault =
+      user.mainVault !== "" && user.mainVault !== undefined
+        ? user.mainVault
+        : "";
+
     localStorage.setItem(USER_NAME, user.name);
     localStorage.setItem(USER_ID, user.aud);
     localStorage.setItem(USER_ROLE, user.role);
-    localStorage.setItem(USER_MAIN_VAULT, user.mainVault);
+    localStorage.setItem(USER_MAIN_VAULT, vault);
+  },
+
+  removeUser() {
+    localStorage.removeItem(USER_NAME);
+    localStorage.removeItem(USER_ID);
+    localStorage.removeItem(USER_ROLE);
+    localStorage.removeItem(USER_MAIN_VAULT);
+  },
+
+  saveMainVault(vault) {
+    const vaultValue = vault !== "" && vault !== undefined ? vault : "";
+    localStorage.setItem(USER_MAIN_VAULT, vaultValue);
   },
 
   getName() {

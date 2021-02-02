@@ -1,19 +1,25 @@
 <template>
   <v-app light>
     <v-container v-if="!loggedIn">
-      <Login />
+      <div v-if="registered">
+        <p class="title">
+          {{ name }} you have been successfully registered 🎉!
+        </p>
+        <p>You can now login with your email and password.</p>
+      </div>
+      <Login @ />
 
       <br />
 
-      <Register />
+      <Register @registered="showLoginMsgAfterRegistration" />
     </v-container>
 
     <div v-if="loggedIn">
-      <div id="vault" class="text-center">
-        <span class="text-overline primary--text">Tresorname </span>
+      <div id="vault" :class="`${mainVault ? '' : 'full-height'}`">
+        <Header />
       </div>
 
-      <div id="content">
+      <div v-if="mainVault" id="content">
         <!-- use a dynamic transition name -->
         <transition name="router-view-fade" mode="out-in">
           <router-view />
@@ -31,14 +37,33 @@
 import BottomNavBar from "./components/BottomNavBar";
 import Login from "./components/Login.vue";
 import Register from "./components/Register.vue";
+import Header from "./components/Header.vue";
 
 export default {
   name: "Budgets",
-  components: { BottomNavBar, Login, Register },
+  components: { BottomNavBar, Login, Register, Header },
   props: {},
+  data() {
+    return {
+      registered: false,
+      name: null,
+    };
+  },
   computed: {
     loggedIn() {
       return this.$store.getters["auth/loggedIn"];
+    },
+    mainVault() {
+      return this.$route.path === "/settings"
+        ? true
+        : this.$store.getters["user/mainVault"];
+    },
+  },
+  created() {},
+  methods: {
+    showLoginMsgAfterRegistration(name) {
+      this.registered = true;
+      this.name = name;
     },
   },
 };
@@ -62,16 +87,17 @@ export default {
   background: #fcfcfc;
   border-bottom: 1px solid #d6d8e7;
   display: grid;
-  grid-template-rows: 100%;
-  grid-template-columns: 100%;
-  align-items: center;
-  height: 45px;
+  min-height: 45px;
   overflow: hidden;
   padding: 0 15px;
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 100;
+}
+
+.full-height {
+  height: 100%;
 }
 
 #nav {
