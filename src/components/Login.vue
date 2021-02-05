@@ -47,7 +47,6 @@
 <script>
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
-import { VaultService } from "@/services/vault.service.js";
 import { UserService } from "@/services/user.service.js";
 
 export default {
@@ -102,13 +101,17 @@ export default {
 
           // if no mainVault is set check if the user has access to other vaults
           if (!mainVault) {
-            const vaults = await VaultService.api.getAll();
+            // check and set  all accessable vaults
+            const vaults = await this.$store.dispatch("vault/setAllVaults");
 
             // if the user has access to vaults set the mainVault to the first vault
             if (vaults.length > 0) {
               await UserService.setMainVault(vaults[0]._id);
             }
           }
+
+          // check and set  all accessable vaults
+          await this.$store.dispatch("vault/setAllVaults");
 
           this.loadingAuthData = false;
         }

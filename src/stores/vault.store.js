@@ -6,12 +6,17 @@ const state = {
   sellingPoints: VaultService.local.getSellingPoints(),
   shared: VaultService.local.getSellingPoints(),
   _id: VaultService.local.getId(),
-  requestVault: false,
+  requestingVault: false,
+  requestingAllVaults: false,
+  vaults: VaultService.local.getAllVaults(),
 };
 
 const getters = {
   name: state => {
     return state.name;
+  },
+  id: state => {
+    return state._id;
   },
   owner: state => {
     return state.owner;
@@ -21,6 +26,9 @@ const getters = {
   },
   shared: state => {
     return state.shared;
+  },
+  allVaults: state => {
+    return state.vaults;
   },
 };
 
@@ -35,12 +43,29 @@ const mutations = {
     state.name = vault.name;
     state.owner = vault.owner;
     state.shared = vault.shared;
-    state.sellingPoints = vault._id;
-    state._id = vault.sellingPoints;
+    state.sellingPoints = vault.sellingPoints;
+    state._id = vault._id;
     state.requestingVault = false;
   },
 
   vaultError(state, { errorCode, errorMessage }) {
+    state.requestingVault = false;
+    state.vaultError = errorCode;
+    state.vaultErrorCode = errorMessage;
+  },
+
+  allVaultsRequest(state) {
+    state.requestingAllVaults = true;
+    state.vaultError = "";
+    state.vaultErrorCode = 0;
+  },
+
+  allVaultsSuccess(state, vaults) {
+    state.vaults = vaults;
+    state.requestingVault = false;
+  },
+
+  allVaultsError(state, { errorCode, errorMessage }) {
     state.requestingVault = false;
     state.vaultError = errorCode;
     state.vaultErrorCode = errorMessage;
@@ -72,6 +97,26 @@ const actions = {
     } catch (e) {
       if (e.name === "VaultError") {
         context.commit("vaultError", {
+          errorCode: e.status,
+          errorMessage: e.message,
+        });
+      }
+      return false;
+    }
+  },
+
+  setAllVaults: async context => {
+    try {
+      let vaults = await VaultService.api.getAll();
+
+      VaultService.local.setAllVaults(vaults);
+
+      context.commit("allVaultsSuccess", vaults);
+
+      return vaults;
+    } catch (e) {
+      if (e.name === "AllVaultsError") {
+        context.commit("allVaultsError", {
           errorCode: e.status,
           errorMessage: e.message,
         });

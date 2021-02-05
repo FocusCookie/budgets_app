@@ -15,8 +15,8 @@
     </v-container>
 
     <div v-if="loggedIn">
-      <div id="vault" :class="`${mainVault ? '' : 'full-height'}`">
-        <Header />
+      <div id="header" :class="fullScreenHeader ? 'full-height' : ''">
+        <Header @fullscreen="displayHeaderFullscreen" />
       </div>
 
       <div v-if="mainVault" id="content">
@@ -47,6 +47,7 @@ export default {
     return {
       registered: false,
       name: null,
+      fullScreenHeader: false,
     };
   },
   computed: {
@@ -64,6 +65,9 @@ export default {
     showLoginMsgAfterRegistration(name) {
       this.registered = true;
       this.name = name;
+    },
+    displayHeaderFullscreen(v) {
+      this.fullScreenHeader = v;
     },
   },
 };
@@ -83,11 +87,10 @@ export default {
   padding-top: 40px;
 }
 
-#vault {
+#header {
   background: #fcfcfc;
   border-bottom: 1px solid #d6d8e7;
   display: grid;
-  min-height: 45px;
   overflow: hidden;
   padding: 0 15px;
   position: fixed;

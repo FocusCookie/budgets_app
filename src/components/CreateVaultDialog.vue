@@ -7,6 +7,16 @@
       indeterminate
     />
 
+    <v-card class="mx-auto my-4 pa-4 rounded-lg primary" dark outlined>
+      Hey
+      <span class="font-weight-bold">{{
+        this.$store.getters["user/name"]
+      }}</span>
+      👋, it seems that you start are just start using budgets! Nice 👍! Please
+      create your first own vault, where you can collect all your expenses. Or
+      ask a friend to add you to their vault to have a shared vault.
+    </v-card>
+
     <form v-if="!creatingVault" @keyup.enter="submit">
       <v-text-field
         v-model="name"
@@ -74,9 +84,8 @@ export default {
           await this.$store.dispatch("vault/set", vault._id);
           await this.$store.dispatch("user/setMainVault", vault._id);
 
-          setTimeout(() => {
-            this.creatingVault = false;
-          }, 2000);
+          this.creatingVault = false;
+          this.$emit("created", true);
         }
       } catch (err) {
         console.log(err);

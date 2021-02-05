@@ -3,6 +3,7 @@ const VAULT_OWNER = "vaultOwner";
 const VAULT_SELLINGPOINTS = "vaultSellingPoints";
 const VAULT_SHARED = "vaultShared";
 const VAULT_ID = "vaultId";
+const VAULTS = "vaults";
 
 import { ApiService } from "@/services/api.service.js";
 
@@ -66,42 +67,53 @@ const VaultService = {
   },
 
   local: {
+    setAllVaults(vaults) {
+      localStorage.setItem(VAULTS, JSON.stringify(vaults));
+    },
+
     setVault(vault) {
       localStorage.setItem(VAULT_NAME, vault.name);
-      localStorage.setItem(VAULT_OWNER, vault.owner);
-      localStorage.setItem(VAULT_SELLINGPOINTS, vault.sellingPoints);
-      localStorage.setItem(VAULT_SHARED, vault.shared);
+      localStorage.setItem(VAULT_OWNER, JSON.stringify(vault.owner));
+      localStorage.setItem(
+        VAULT_SELLINGPOINTS,
+        JSON.stringify(vault.sellingPoints),
+      );
+      localStorage.setItem(VAULT_SHARED, JSON.stringify(vault.shared));
       localStorage.setItem(VAULT_ID, vault._id);
     },
 
     getVault() {
       return {
         name: localStorage.getItem(VAULT_NAME),
-        owner: localStorage.getItem(VAULT_OWNER),
-        sellingPoints: localStorage.getItem(VAULT_SELLINGPOINTS),
-        shared: localStorage.getItem(VAULT_SHARED),
+        owner: JSON.parse(localStorage.getItem(VAULT_OWNER)),
+        sellingPoints: JSON.parse(localStorage.getItem(VAULT_SELLINGPOINTS)),
+        shared: JSON.parse(localStorage.getItem(VAULT_SHARED)),
         _id: localStorage.getItem(VAULT_ID),
       };
     },
 
+    getAllVaults() {
+      return JSON.parse(localStorage.getItem(VAULTS));
+    },
+
     getName() {
-      localStorage.getItem(VAULT_NAME);
+      return localStorage.getItem(VAULT_NAME);
     },
 
     getOwner() {
-      localStorage.getItem(VAULT_OWNER);
+      return JSON.parse(localStorage.getItem(VAULT_OWNER));
     },
 
     getSellingPoints() {
-      localStorage.getItem(VAULT_SELLINGPOINTS);
+      return JSON.parse(localStorage.getItem(VAULT_SELLINGPOINTS));
     },
 
     getShared() {
-      localStorage.getItem(VAULT_SELLINGPOINTS);
+      return JSON.parse(localStorage.getItem(VAULT_SELLINGPOINTS));
     },
 
     getId() {
-      localStorage.getItem(VAULT_ID);
+      return localStorage.getItem(VAULT_ID);
     },
 
     removeVault() {
@@ -115,10 +127,10 @@ const VaultService = {
       localStorage.setItem(VAULT_NAME, name);
     },
     setSellingPoints(sellingPoints) {
-      localStorage.setItem(VAULT_SELLINGPOINTS, sellingPoints);
+      localStorage.setItem(VAULT_SELLINGPOINTS, JSON.stringify(sellingPoints));
     },
     setShared(sharedUsers) {
-      localStorage.setItem(VAULT_SELLINGPOINTS, sharedUsers);
+      localStorage.setItem(VAULT_SELLINGPOINTS, JSON.stringify(sharedUsers));
     },
   },
 };
