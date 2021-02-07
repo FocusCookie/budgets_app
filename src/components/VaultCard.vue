@@ -40,6 +40,7 @@
 
 <script>
 import EditVaultDialog from "@/components/EditVaultDialog.vue";
+import { UserService } from "@/services/user.service.js";
 
 export default {
   name: "VaultCard",
@@ -66,6 +67,7 @@ export default {
     async setToMainVault() {
       if (this.vault._id !== this.$store.getters["vault/id"]) {
         this.loading = true;
+        await UserService.api.setMainVault(this.vault._id);
         await this.$store.dispatch("vault/set", this.vault._id);
         await this.$store.dispatch("user/setMainVault", this.vault._id);
 

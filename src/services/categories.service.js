@@ -16,6 +16,9 @@ const CategoriesService = {
     getAll() {
       return localStorage.getItem(CATEGORIES);
     },
+    removeAll() {
+      return localStorage.removeItem(CATEGORIES);
+    },
   },
 };
 

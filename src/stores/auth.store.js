@@ -4,6 +4,8 @@ import { UserService } from "@/services/user.service";
 import router from "@/router/index";
 import { store } from "@/services/store.service.js";
 import { VaultService } from "../services/vault.service";
+import { CategoriesService } from "../services/categories.service";
+import { SellingPointsService } from "../services/sellingPoints.service";
 
 const state = {
   authenticating: false,
@@ -146,12 +148,18 @@ const actions = {
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
       UserService.local.removeUser(); // remove all stored user information from the localStorage
       VaultService.local.removeVault(); // remove the vault informations form the localStorage
+      VaultService.local.removeVaults(); // remove all vaults where the user has access to
+      CategoriesService.local.removeAll(); // remove all vaults where the user has access to
+      SellingPointsService.local.removeAll(); // remove all vaults where the user has access to
       context.commit("logoutSuccess");
       router.push("/login");
     } catch (err) {
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
       UserService.local.removeUser(); // remove all stored user information from the localStorage
       VaultService.local.removeVault(); // remove the vault informations form the localStorage
+      VaultService.local.removeVaults(); // remove all vaults where the user has access to
+      CategoriesService.local.removeAll(); // remove all vaults where the user has access to
+      SellingPointsService.local.removeAll(); // remove all vaults where the user has access to
       context.commit("logoutSuccess");
       router.push("/login");
       console.log(err);

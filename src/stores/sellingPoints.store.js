@@ -1,7 +1,7 @@
 import { SellingPointsService } from "@/services/sellingPoints.service.js";
 
 const state = {
-  sellingPoints: false,
+  sellingPoints: SellingPointsService.local.getAll(),
   requestingSellingPoints: false,
   sellingPointsError: "",
   sellingPointsErrorCode: 0,
@@ -33,11 +33,9 @@ const mutations = {
 };
 
 const actions = {
-  setAll: async context => {
+  setAll: async (context, sellingPoints) => {
     try {
       context.commit("sellingPointsRequest");
-
-      let sellingPoints = await SellingPointsService.api.getAll();
 
       SellingPointsService.local.setAll(sellingPoints);
 
@@ -56,7 +54,7 @@ const actions = {
   },
 };
 
-export const CategoriesStore = {
+export const SellingPointsStore = {
   namespaced: true,
   state,
   getters,

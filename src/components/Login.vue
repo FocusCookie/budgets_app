@@ -48,6 +48,7 @@
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
 import { UserService } from "@/services/user.service.js";
+import { SellingPointsService } from "@/services/sellingPoints.service.js";
 
 export default {
   name: "Login",
@@ -112,6 +113,17 @@ export default {
 
           // check and set  all accessable vaults
           await this.$store.dispatch("vault/setAllVaults");
+
+          // push all the users sellingPoints and the sellingPoints where the user has access to form the choosen vault
+          const userSellingPoints = await SellingPointsService.api.getAll();
+          const vaultSellingPoints = this.$store.getters["vault/sellingPoints"];
+          const sellingPoints = [...userSellingPoints, ...vaultSellingPoints];
+
+          console.log(userSellingPoints);
+          console.log(vaultSellingPoints);
+          console.log(sellingPoints);
+
+          await this.$store.dispatch("sellingPoints/setAll", sellingPoints);
 
           // get all categories and set them locally
           await this.$store.dispatch("categories/setAll");

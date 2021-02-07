@@ -7,6 +7,7 @@ import { UserStore } from "@/stores/user.store.js";
 import { VaultStore } from "@/stores/vault.store.js";
 import { ExpensesStore } from "@/stores/expenses.store.js";
 import { CategoriesStore } from "@/stores/categories.store.js";
+import { SellingPointsStore } from "@/stores/sellingPoints.store.js";
 
 Vue.use(Vuex);
 
@@ -17,5 +18,6 @@ export const store = new Vuex.Store({
     vault: VaultStore,
     expenses: ExpensesStore,
     categories: CategoriesStore,
+    sellingPoints: SellingPointsStore,
   },
 });

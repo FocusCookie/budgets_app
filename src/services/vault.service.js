@@ -10,17 +10,13 @@ import { ApiService } from "@/services/api.service.js";
 const VaultService = {
   api: {
     async getAll() {
-      const vaults = await ApiService.get("vaults");
-
-      return vaults;
+      return await ApiService.get("vaults");
     },
 
     async get(id) {
       if (!id) throw { name: "GET vault/id", message: "No ID given" };
 
-      const vaults = await ApiService.get(`vaults/${id}`);
-
-      return vaults;
+      return await ApiService.get(`vaults/${id}`);
     },
 
     async create(name) {
@@ -30,9 +26,7 @@ const VaultService = {
     },
 
     async edit(id, name) {
-      const editedVault = await ApiService.put(`vaults/${id}`, { name: name });
-
-      return editedVault;
+      return ApiService.put(`vaults/${id}`, { name: name });
     },
 
     async delete(id) {
@@ -123,6 +117,10 @@ const VaultService = {
       localStorage.removeItem(VAULT_SHARED);
       localStorage.removeItem(VAULT_ID);
     },
+    removeVaults() {
+      localStorage.removeItem(VAULTS);
+    },
+
     setName(name) {
       localStorage.setItem(VAULT_NAME, name);
     },
