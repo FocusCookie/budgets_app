@@ -23,6 +23,7 @@
         <div class="list px-3">
           <transition-group name="list" tag="div">
             >
+            {{ expenses }}
             <Expenses
               v-for="expense in monthlyExpenses"
               :key="`${expense.name}-${expense.dateCreated}`"
@@ -55,6 +56,7 @@
 import ExpensesMenuBar from "@/components/ExpensesMenuBar";
 import Expenses from "@/components/Expenses";
 import CreateExpenseDialog from "@/components/CreateExpenseDialog";
+import { ExpensesService } from "@/services/expenses.service.js";
 
 export default {
   name: "Home",
@@ -68,7 +70,7 @@ export default {
       createDialog: false,
       editDialog: false,
       typeToShow: "spontaneous",
-      expenses: null,
+      expenses: [],
       devExpenses: [
         {
           dateCreated: "20:01:52",
@@ -149,10 +151,11 @@ export default {
       return this.$store.getters["user/mainVault"];
     },
   },
-  created() {
+  async created() {
     // only for dev, delete after dev
     if (!this.expenses) this.expenses = this.devExpenses;
 
+    this.expenses = await ExpensesService.api.getCurrentMonth();
     this.nextNum = this.expenses.length;
   },
   methods: {

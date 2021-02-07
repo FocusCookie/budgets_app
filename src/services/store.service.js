@@ -5,6 +5,8 @@ import Vuex from "vuex";
 import { AuthStore } from "@/stores/auth.store.js";
 import { UserStore } from "@/stores/user.store.js";
 import { VaultStore } from "@/stores/vault.store.js";
+import { ExpensesStore } from "@/stores/expenses.store.js";
+import { CategoriesStore } from "@/stores/categories.store.js";
 
 Vue.use(Vuex);
 
@@ -13,5 +15,7 @@ export const store = new Vuex.Store({
     auth: AuthStore,
     user: UserStore,
     vault: VaultStore,
+    expenses: ExpensesStore,
+    categories: CategoriesStore,
   },
 });

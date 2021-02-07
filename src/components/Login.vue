@@ -77,7 +77,7 @@ export default {
       return errors;
     },
   },
-  created() {},
+  async created() {},
   methods: {
     async submit() {
       try {
@@ -112,6 +112,9 @@ export default {
 
           // check and set  all accessable vaults
           await this.$store.dispatch("vault/setAllVaults");
+
+          // get all categories and set them locally
+          await this.$store.dispatch("categories/setAll");
 
           this.loadingAuthData = false;
         }

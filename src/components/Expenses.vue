@@ -18,7 +18,7 @@
       <p
         class="sellingPointName text-body-4 text-uppercase font-weight-bold pa-0 ma-0"
       >
-        {{ expense.sellingPoint.name }}
+        {{ expense.sellingPoint }}
       </p>
     </div>
 
@@ -43,7 +43,7 @@
         expenseSum font-weight-bold text-right text-h2 secondary--text
       "
     >
-      {{ expense.sum.toFixed(2) }} €
+      {{ expense.sum }} €
     </div>
   </div>
 </template>
