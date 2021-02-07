@@ -35,6 +35,7 @@ const mutations = {
 const actions = {
   setAll: async context => {
     try {
+      context.commit("categoriesRequest");
       let categories = await CategoriesService.api.getAll();
 
       CategoriesService.local.setAll(categories);
