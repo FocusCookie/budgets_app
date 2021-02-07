@@ -8,7 +8,7 @@
   >
     <v-card class="text-left">
       <v-card-title
-        class="headlineCenter text-uppercase font-weight-bold  py-3  "
+        class="headlineCenter primary--text text-uppercase font-weight-bold  py-3  "
       >
         Create a new Expense
       </v-card-title>

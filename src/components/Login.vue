@@ -106,7 +106,7 @@ export default {
 
             // if the user has access to vaults set the mainVault to the first vault
             if (vaults.length > 0) {
-              await UserService.setMainVault(vaults[0]._id);
+              await UserService.api.setMainVault(vaults[0]._id);
             }
           }
 

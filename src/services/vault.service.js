@@ -30,7 +30,7 @@ const VaultService = {
     },
 
     async edit(id, name) {
-      const editedVault = await ApiService.post(`vaults/${id}`, { name: name });
+      const editedVault = await ApiService.put(`vaults/${id}`, { name: name });
 
       return editedVault;
     },

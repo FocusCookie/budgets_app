@@ -2,7 +2,6 @@
   <div class="vaultsWrapper text-left">
     <v-card
       class="mx-auto my-4 pa-4 rounded-lg"
-      :disabled="selected"
       :outlined="selected"
       :loading="loading"
       @click="setToMainVault"
@@ -12,45 +11,73 @@
           vault.name.toUpperCase()
         }}</span>
 
-        <v-chip
-          :class="selected ? 'primary--text' : ''"
-          :color="selected ? 'white' : 'primary'"
-          label
-        >
+        <v-chip v-if="!userIsTheOwner" color="primary" label>
           <v-icon left>
             mdi-account-circle-outline
           </v-icon>
           {{ vault.owner.name }}
         </v-chip>
+        <v-btn v-if="selected && userIsTheOwner" dark fab small color="primary">
+          <v-icon small dark>
+            mdi-pen
+          </v-icon>
+        </v-btn>
       </div>
     </v-card>
+
+    <v-dialog v-model="showVaultEditDialog">
+      <v-card class="pa-4 rounded-xl">
+        <EditVaultDialog
+          :vault="vault"
+          @changed="closeEditVaultDialog"
+          @canceled="closeEditVaultDialog"
+          @deleted="closeEditVaultDialog"
+        />
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
+import EditVaultDialog from "@/components/EditVaultDialog.vue";
+
 export default {
   name: "VaultCard",
   validations: {},
+  components: { EditVaultDialog },
   props: ["vault"],
   data() {
     return {
       loading: false,
+      showVaultEditDialog: false,
     };
   },
   computed: {
     selected() {
       return this.$store.getters["vault/id"] === this.vault._id;
     },
+    userIsTheOwner() {
+      return this.vault.owner._id === this.$store.getters["user/id"];
+    },
   },
   watch: {},
   created() {},
   methods: {
     async setToMainVault() {
-      this.loading = true;
-      await this.$store.dispatch("vault/set", this.vault._id);
-      await this.$store.dispatch("user/setMainVault", this.vault._id);
+      if (this.vault._id !== this.$store.getters["vault/id"]) {
+        this.loading = true;
+        await this.$store.dispatch("vault/set", this.vault._id);
+        await this.$store.dispatch("user/setMainVault", this.vault._id);
 
-      this.loading = false;
+        this.loading = false;
+      } else {
+        if (this.userIsTheOwner) {
+          this.showVaultEditDialog = true;
+        }
+      }
+    },
+    closeEditVaultDialog() {
+      this.showVaultEditDialog = false;
     },
   },
 };
@@ -60,5 +87,8 @@ export default {
 <style scoped>
 .vaultsWrapper {
   height: inherit;
+}
+.card-disabled-opacity {
+  opacity: 1;
 }
 </style>

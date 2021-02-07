@@ -144,13 +144,13 @@ const actions = {
       TokenService.removeAccessToken();
       await AuthService.logout(state.refreshToken);
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
-      UserService.removeUser(); // remove all stored user information from the localStorage
+      UserService.local.removeUser(); // remove all stored user information from the localStorage
       VaultService.local.removeVault(); // remove the vault informations form the localStorage
       context.commit("logoutSuccess");
       router.push("/login");
     } catch (err) {
       TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
-      UserService.removeUser(); // remove all stored user information from the localStorage
+      UserService.local.removeUser(); // remove all stored user information from the localStorage
       VaultService.local.removeVault(); // remove the vault informations form the localStorage
       context.commit("logoutSuccess");
       router.push("/login");

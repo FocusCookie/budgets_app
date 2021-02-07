@@ -1,32 +1,25 @@
 <template>
-  <div>
+  <div class="wrapper">
     <span class="text-h6 primary--text font-weight-bold text-uppercase"
-      >Create new vault</span
-    >
+      >Edit {{ vault.name }}
+    </span>
+
+    <div v-if="deleteRequirementsMsg" class="mt-4">
+      <p class="font-weight-bold">🚨 Deleting {{ vault.name }}</p>
+      <p>
+        To delete the vault, please type in
+        <span class="font-weight-bold error--text">{{ vault.name }} </span>and
+        click delete.
+      </p>
+    </div>
 
     <v-progress-circular
-      v-if="creatingVault"
+      v-if="editingVault"
       :size="100"
       color="primary"
       indeterminate
     />
-
-    <v-card
-      v-if="firstVault"
-      class="mx-auto pa-2 mb-6 rounded-lg primary"
-      dark
-      outlined
-    >
-      Hey
-      <span class="font-weight-bold">{{
-        this.$store.getters["user/name"]
-      }}</span>
-      👋, it seems that you start are just start using budgets! Nice 👍! Please
-      create your first own vault, where you can collect all your expenses. Or
-      ask a friend to add you to their vault to have a shared vault.
-    </v-card>
-
-    <form v-if="!creatingVault" class="mt-4" @keyup.enter="submit">
+    <form v-if="!editingVault" class="mt-4" @keyup.enter="submit">
       <v-text-field
         v-model="name"
         :error-messages="nameErrors"
@@ -42,19 +35,16 @@
       />
 
       <div class="buttonsWrapper">
-        <v-btn
-          v-if="!firstVault"
-          rounded
-          x-large
-          color="secondary"
-          text
-          @click="cancel"
-        >
+        <v-btn rounded x-large color="secondary" text @click="cancel">
           Cancel
         </v-btn>
 
+        <v-btn rounded x-large color="error" text @click="deleteVault">
+          Delete
+        </v-btn>
+
         <v-btn rounded x-large color="primary" @click="submit">
-          Create vault
+          save vault
         </v-btn>
       </div>
     </form>
@@ -68,16 +58,17 @@ import { VaultService } from "@/services/vault.service.js";
 import { UserService } from "@/services/user.service.js";
 
 export default {
-  name: "CreateVaultDialog",
+  name: "EditVaultDialog",
   mixins: [validationMixin],
+  props: ["vault"],
   validations: {
     name: { required, minLength: minLength(3), maxLength: maxLength(30) },
   },
-  props: ["firstVault"],
   data() {
     return {
       name: "",
-      creatingVault: false,
+      editingVault: false,
+      deleteRequirementsMsg: false,
     };
   },
   computed: {
@@ -99,26 +90,46 @@ export default {
         this.$v.$touch();
 
         if (this.nameErrors.length === 0 && this.name.length >= 3) {
-          this.creatingVault = true;
+          this.editingVault = true;
 
-          const vault = await VaultService.api.create(this.name);
-          await UserService.api.setMainVault(vault._id);
+          const editedVault = await VaultService.api.edit(
+            this.vault._id,
+            this.name,
+          );
 
-          await this.$store.dispatch("vault/set", vault._id);
-          await this.$store.dispatch("user/setMainVault", vault._id);
+          await this.$store.dispatch("vault/set", editedVault._id);
 
           await this.$store.dispatch("vault/setAllVaults");
 
-          this.creatingVault = false;
-          this.name = "";
-          this.$emit("created", true);
+          this.editingVault = false;
+          this.$emit("changed", true);
         }
       } catch (err) {
         console.log(err);
       }
     },
+    async deleteVault() {
+      if (this.name === this.vault.name) {
+        await VaultService.api.delete(this.vault._id);
+
+        const vaultWithAccessTo = await this.$store.dispatch(
+          "vault/setAllVaults",
+        );
+
+        await UserService.api.setMainVault(vaultWithAccessTo[0]._id);
+
+        await this.$store.dispatch("vault/set", vaultWithAccessTo[0]._id);
+        await this.$store.dispatch(
+          "user/setMainVault",
+          vaultWithAccessTo[0]._id,
+        );
+
+        this.$emit("deleted", true);
+      } else {
+        this.deleteRequirementsMsg = true;
+      }
+    },
     cancel() {
-      this.name = "";
       this.$emit("canceled", true);
     },
   },
@@ -130,5 +141,9 @@ export default {
 .buttonsWrapper {
   display: flex;
   justify-content: space-between;
+}
+.wrapper {
+  display: flex;
+  flex-direction: column;
 }
 </style>

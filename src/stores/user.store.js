@@ -2,10 +2,10 @@ import jwt_decode from "jwt-decode";
 import { UserService } from "@/services/user.service";
 
 const state = {
-  id: UserService.getId(),
-  name: UserService.getName(),
-  role: UserService.getRole(),
-  mainVault: UserService.getMainVault(),
+  id: UserService.local.getId(),
+  name: UserService.local.getName(),
+  role: UserService.local.getRole(),
+  mainVault: UserService.local.getMainVault(),
 };
 
 const getters = {
@@ -53,7 +53,7 @@ const actions = {
         email: user.email,
       });
 
-      UserService.saveUser(user);
+      UserService.local.saveUser(user);
 
       return true;
     } catch (error) {
@@ -70,7 +70,7 @@ const actions = {
   },
 
   setMainVault: (context, vault) => {
-    UserService.saveMainVault(vault);
+    UserService.local.saveMainVault(vault);
     context.commit("mainVault", vault);
   },
 };

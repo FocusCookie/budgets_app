@@ -16,7 +16,7 @@
           x-small
           color="primary"
           outlined
-          @click="expand = !expand || displayCreateFirstVault"
+          @click="expand = !expand"
         >
           <v-icon>{{ expand ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
         </v-btn>
@@ -34,11 +34,7 @@
       </div>
     </v-expand-transition>
 
-    <v-dialog
-      v-model="showCreateVaultDialog"
-      :persistent="firstVault"
-      @input="closeDialog"
-    >
+    <v-dialog v-model="showCreateVaultDialog" :persistent="firstVault">
       <v-card class="pa-4 rounded-xl">
         <CreateVaultDialog
           :first-vault="firstVault"
@@ -98,7 +94,6 @@ export default {
   methods: {
     closeCreateVaultDialog() {
       this.showCreateVaultDialog = false;
-      this.displayCreateFirstVault = false;
     },
     closeDialog() {
       this.showCreateVaultDialog = false;
