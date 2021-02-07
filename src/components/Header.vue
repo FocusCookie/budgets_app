@@ -16,25 +16,37 @@
           x-small
           color="primary"
           outlined
-          @click="expand = !expand"
+          @click="expand = !expand || displayCreateFirstVault"
         >
-          <v-icon>mdi-chevron-down</v-icon>
+          <v-icon>{{ expand ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
         </v-btn>
       </div>
     </div>
 
     <v-expand-transition>
       <div v-if="expand && showHeaderFullScreen">
-        <div>
+        <div class="my-4">
+          <v-btn rounded color="primary" @click="showCreateVaultDialog = true">
+            Create new vault
+          </v-btn>
           <Vaults />
         </div>
-
-        <CreateVaultDialog
-          v-if="displayCreateFirstVault"
-          @created="closeCreateVaultDialog"
-        />
       </div>
     </v-expand-transition>
+
+    <v-dialog
+      v-model="showCreateVaultDialog"
+      :persistent="firstVault"
+      @input="closeDialog"
+    >
+      <v-card class="pa-4 rounded-xl">
+        <CreateVaultDialog
+          :first-vault="firstVault"
+          @created="closeCreateVaultDialog"
+          @canceled="closeCreateVaultDialog"
+        />
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -48,14 +60,12 @@ export default {
   data() {
     return {
       expand: false,
-      displayCreateFirstVault: false,
+      showCreateVaultDialog: false,
     };
   },
   computed: {
     showHeaderFullScreen() {
-      return (
-        (this.displayCreateFirstVault || this.expand) && !this.settingsSelected
-      );
+      return this.expand && !this.settingsSelected;
     },
     mainVault() {
       return this.$store.getters["user/mainVault"];
@@ -68,6 +78,9 @@ export default {
         ? this.$store.getters["vault/name"]
         : "Please create a vault to start";
     },
+    firstVault() {
+      return this.mainVault ? false : true;
+    },
   },
   watch: {
     showHeaderFullScreen(v) {
@@ -79,15 +92,16 @@ export default {
     if (this.mainVault !== "" && this.mainVault !== undefined) {
       await this.$store.dispatch("vault/set", this.mainVault);
     } else {
-      this.displayCreateFirstVault = true;
+      this.showCreateVaultDialog = true;
     }
   },
   methods: {
     closeCreateVaultDialog() {
-      console.log("CLOSE");
-
-      this.expand = false;
+      this.showCreateVaultDialog = false;
       this.displayCreateFirstVault = false;
+    },
+    closeDialog() {
+      this.showCreateVaultDialog = false;
     },
   },
 };

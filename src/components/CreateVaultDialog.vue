@@ -7,7 +7,12 @@
       indeterminate
     />
 
-    <v-card class="mx-auto my-4 pa-4 rounded-lg primary" dark outlined>
+    <v-card
+      v-if="firstVault"
+      class="mx-auto pa-2 mb-6 rounded-lg primary"
+      dark
+      outlined
+    >
       Hey
       <span class="font-weight-bold">{{
         this.$store.getters["user/name"]
@@ -32,9 +37,22 @@
         @blur="$v.name.$touch()"
       />
 
-      <v-btn class="mb-6" rounded x-large color="primary" @click="submit">
-        Create vault
-      </v-btn>
+      <div class="buttonsWrapper">
+        <v-btn
+          v-if="!firstVault"
+          rounded
+          x-large
+          color="error"
+          text
+          @click="cancel"
+        >
+          Cancel
+        </v-btn>
+
+        <v-btn rounded x-large color="primary" @click="submit">
+          Create vault
+        </v-btn>
+      </div>
     </form>
   </div>
 </template>
@@ -51,6 +69,7 @@ export default {
   validations: {
     name: { required, minLength: minLength(3), maxLength: maxLength(30) },
   },
+  props: ["firstVault"],
   data() {
     return {
       name: "",
@@ -84,6 +103,8 @@ export default {
           await this.$store.dispatch("vault/set", vault._id);
           await this.$store.dispatch("user/setMainVault", vault._id);
 
+          await this.$store.dispatch("vault/setAllVaults");
+
           this.creatingVault = false;
           this.$emit("created", true);
         }
@@ -91,12 +112,21 @@ export default {
         console.log(err);
       }
     },
-    clear() {
-      this.name = "";
+    cancel() {
+      this.$emit("canceled", true);
     },
+  },
+  beforeUnmount() {
+    console.log("UN");
+    this.cancel();
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style scoped>
+.buttonsWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+</style>

@@ -2,8 +2,6 @@
   <div class="vaultsWrapper text-left">
     <v-card
       class="mx-auto my-4 pa-4 rounded-lg"
-      :color="selected ? 'primary' : ''"
-      :dark="selected"
       :disabled="selected"
       :outlined="selected"
       :loading="loading"
