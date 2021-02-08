@@ -117,13 +117,10 @@ export default {
           // push all the users sellingPoints and the sellingPoints where the user has access to form the choosen vault
           const userSellingPoints = await SellingPointsService.api.getAll();
           const vaultSellingPoints = this.$store.getters["vault/sellingPoints"];
-          const sellingPoints = [...userSellingPoints, ...vaultSellingPoints];
-
-          console.log(userSellingPoints);
-          console.log(vaultSellingPoints);
-          console.log(sellingPoints);
-
-          await this.$store.dispatch("sellingPoints/setAll", sellingPoints);
+          await this.$store.dispatch("sellingPoints/setAll", [
+            ...userSellingPoints,
+            ...vaultSellingPoints,
+          ]);
 
           // get all categories and set them locally
           await this.$store.dispatch("categories/setAll");

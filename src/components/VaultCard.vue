@@ -41,6 +41,7 @@
 <script>
 import EditVaultDialog from "@/components/EditVaultDialog.vue";
 import { UserService } from "@/services/user.service.js";
+import { SellingPointsService } from "@/services/sellingPoints.service.js";
 
 export default {
   name: "VaultCard",
@@ -70,6 +71,14 @@ export default {
         await UserService.api.setMainVault(this.vault._id);
         await this.$store.dispatch("vault/set", this.vault._id);
         await this.$store.dispatch("user/setMainVault", this.vault._id);
+
+        // push all the users sellingPoints and the sellingPoints where the user has access to form the choosen vault
+        const userSellingPoints = await SellingPointsService.api.getAll();
+        const vaultSellingPoints = this.$store.getters["vault/sellingPoints"];
+        await this.$store.dispatch("sellingPoints/setAll", [
+          ...userSellingPoints,
+          ...vaultSellingPoints,
+        ]);
 
         this.loading = false;
       } else {
