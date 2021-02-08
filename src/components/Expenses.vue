@@ -1,24 +1,30 @@
 <template>
   <div id="expensesContainer" class="pa-3 my-3 ">
-    <div :class="`sellingPointInitials ${expense.sellingPoint.color}`">
+    <v-card
+      class="sellingPointInitials"
+      elevation="0"
+      :color="`${sellingPoint.color}`"
+    >
       <span class="text-uppercase white--text font-weight-black">{{
-        expense.sellingPoint.initials
+        sellingPoint.initials
       }}</span>
-    </div>
+    </v-card>
 
     <div class="sellingPointIcon">
-      <span class="text-h5">{{ expense.sellingPoint.icon }}</span>
+      <v-icon>
+        {{ categories.find(cat => cat.title === sellingPoint.category).icon }}
+      </v-icon>
     </div>
 
     <div class="sellingPointCategoryAndName text-left">
       <span
         class="sellingPointCategory text-overline pa-0 mb-0  font-weight-bold secondary--text text--lighten-2"
-        >{{ expense.sellingPoint.category }}
+        >{{ sellingPoint.category }}
       </span>
       <p
         class="sellingPointName text-body-4 text-uppercase font-weight-bold pa-0 ma-0"
       >
-        {{ expense.sellingPoint }}
+        {{ sellingPoint.name }}
       </p>
     </div>
 
@@ -55,7 +61,16 @@ export default {
   data() {
     return {};
   },
-  computed: {},
+  computed: {
+    sellingPoint() {
+      const sellingPoints = this.$store.getters["sellingPoints/all"];
+
+      return sellingPoints.find(sp => sp._id === this.expense.sellingPoint);
+    },
+    categories() {
+      return this.$store.getters["categories/all"];
+    },
+  },
   created() {},
   methods: {
     emitEdit() {

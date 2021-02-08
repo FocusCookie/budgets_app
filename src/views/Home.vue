@@ -11,22 +11,40 @@
         >
           <transition-group name="list" tag="div">
             >
+            <v-card
+              v-if="spontaneousExpenses.length === 0"
+              key="noteNoSpontan"
+              class="pa-4 mt-4 rounded-lg"
+              outlined
+              rounded
+            >
+              So far no spontaneous expenses this month!
+            </v-card>
             <Expenses
               v-for="expense in spontaneousExpenses"
-              :key="`${expense.name}-${expense.dateCreated}`"
+              :key="`${expense._id}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
               @edit="startEditingExpense(expense)"
             />
           </transition-group>
         </div>
+
         <div class="list px-3">
           <transition-group name="list" tag="div">
             >
-            {{ expenses }}
+            <v-card
+              v-if="monthlyExpenses.length === 0"
+              key="noteNoMonthly"
+              class="pa-4 mt-4 rounded-lg"
+              outlined
+              rounded
+            >
+              So far no monthly expenses this month!
+            </v-card>
             <Expenses
               v-for="expense in monthlyExpenses"
-              :key="`${expense.name}-${expense.dateCreated}`"
+              :key="`${expense._id}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
               @edit="startEditingExpense(expense)"
@@ -44,8 +62,7 @@
 
     <CreateExpenseDialog
       v-if="createDialog"
-      :selling-points="sellingPoints"
-      :selling-point-categories="sellingPointCategories"
+      @created="expenseSuccessfullyCreated"
       @cancel="cancelCreatingExpense"
     />
   </div>
@@ -56,7 +73,6 @@
 import ExpensesMenuBar from "@/components/ExpensesMenuBar";
 import Expenses from "@/components/Expenses";
 import CreateExpenseDialog from "@/components/CreateExpenseDialog";
-import { ExpensesService } from "@/services/expenses.service.js";
 
 export default {
   name: "Home",
@@ -70,7 +86,6 @@ export default {
       createDialog: false,
       editDialog: false,
       typeToShow: "spontaneous",
-      expenses: [],
       devExpenses: [
         {
           dateCreated: "20:01:52",
@@ -122,22 +137,14 @@ export default {
         },
       ],
       toggleNew: true,
-      sellingPoints: [
-        //TODO: needs to be fetched via api
-        "Rewe",
-        "Lidl",
-        "Edeka",
-        "Amazon",
-        "OBI",
-        "Starbucks",
-        "Dönerladen",
-        "Lieferando",
-      ],
-      sellingPointCategories: ["Food", "Drinks", "Streaming"], //TODO:  needs be fetched via api
       selectedExpenseToEdit: null,
     };
   },
   computed: {
+    expenses() {
+      const exp = this.$store.getters["expenses/currentMonth"];
+      return exp ? exp.reverse() : [];
+    },
     monthlyExpenses() {
       return this.expenses.filter(expense => expense.type === "monthly");
     },
@@ -151,14 +158,11 @@ export default {
       return this.$store.getters["user/mainVault"];
     },
   },
-  async created() {
-    // only for dev, delete after dev
-    if (!this.expenses) this.expenses = this.devExpenses;
-
-    this.expenses = await ExpensesService.api.getCurrentMonth();
-    this.nextNum = this.expenses.length;
-  },
+  async created() {},
   methods: {
+    expenseSuccessfullyCreated() {
+      this.createDialog = false;
+    },
     toggleExpensesTypeToShow(type) {
       if (this.typeToShow !== type) this.typeToShow = type;
     },
@@ -182,21 +186,18 @@ export default {
       });
       this.toggleNew = !this.toggleNew;
     },
-    createdExpense(v) {
+    createdExpense() {
       this.createDialog = false;
-      console.log("CREATED ", v);
     },
     cancelCreatingExpense() {
       this.createDialog = false;
       console.log("CANCELED CRATE EXPENSE");
     },
-    editedExpense(v) {
+    editedExpense() {
       this.editDialog = false;
-      console.log("EDITED ", v);
     },
     cancelEditingExpense() {
       this.editDialog = false;
-      console.log("CANCELED EDIT EXPENSE");
     },
     startEditingExpense(expense) {
       this.editDialog = true;

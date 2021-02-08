@@ -5,7 +5,7 @@ const SELLING_POINTS = "sellingPoints";
 const SellingPointsService = {
   api: {
     async getAll() {
-      return await ApiService.get("sellingPoints");
+      return ApiService.get("sellingPoints");
     },
 
     async get(id) {
@@ -41,7 +41,7 @@ const SellingPointsService = {
     },
 
     removeAll() {
-      return JSON.parse(localStorage.removeItem(SELLING_POINTS));
+      localStorage.removeItem(SELLING_POINTS);
     },
   },
 };

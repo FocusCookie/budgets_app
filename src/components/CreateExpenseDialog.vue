@@ -68,23 +68,28 @@
             label="Name"
             placeholder="enter a name"
             rounded
+            hide-details
             outlined
             dense
             maxlength="50"
-            hide-details
             :error="enteredSellingPointNameError"
-            :rules="[rules.required, rules.min]"
+            :rules="[
+              rules.required,
+              rules.minSellingPointName,
+              rules.maxSellingPointName,
+            ]"
             @input="enterSellingPointName"
           />
           <v-text-field
+            v-model="enteredSellingPointInitials"
             class="py-3"
             small
             color="primary"
             label="Initials"
             rounded
+            hide-details
             outlined
             dense
-            hide-details
             maxlength="2"
             :error="enteredSellingPointInitalsError"
             :rules="[
@@ -94,6 +99,9 @@
             ]"
             @input="enterSellingPointInitials"
           />
+
+          <v-color-picker v-model="color" hide-inputs />
+
           <v-select
             :items="sellingPointCategories"
             label="Category"
@@ -108,11 +116,11 @@
         </div>
       </v-card-text>
       <div class="pa-4 text-center buttonsContainer">
-        <v-btn rounded color="error" text @click="cancelCreation">
+        <v-btn x-small rounded color="error" text @click="cancelCreation">
           Cancel
         </v-btn>
 
-        <v-btn color="primary" rounded dark @click="createExpense">
+        <v-btn x-small color="primary" rounded dark @click="createExpense">
           Create expense
         </v-btn>
       </div>
@@ -123,7 +131,6 @@
 <script>
 export default {
   name: "CreateExpenseDialog",
-  props: ["sellingPoints", "sellingPointCategories"],
   data() {
     return {
       newSellingPointCreationText: "create new selling point",
@@ -132,6 +139,7 @@ export default {
       enteredSellingPointInitials: "",
       enteredSellingPointName: "",
       selectedSellingPointCategory: "",
+      sellingPointColor: "primary",
       selectedSellingPoint: "",
       enteredSumError: false,
       selectedSellingPointError: false,
@@ -147,13 +155,55 @@ export default {
         minSellingPointName: v => v.length >= 2 || "Min 2 character.",
         maxSellingPointName: v => v.length <= 50 || "Max 50 characters.",
       },
+      type: "hex",
+      hex: "#673AB7",
     };
   },
   computed: {
+    color: {
+      get() {
+        return this[this.type];
+      },
+      set(v) {
+        this[this.type] = v;
+      },
+    },
+    showColor() {
+      if (typeof this.color === "string") return this.color;
+
+      return JSON.stringify(
+        Object.keys(this.color).reduce((color, key) => {
+          color[key] = Number(this.color[key].toFixed(2));
+          return color;
+        }, {}),
+        null,
+        2,
+      );
+    },
     sellingPointsToSelect() {
-      let result = this.sellingPoints.map(el => el);
-      result.push(this.newSellingPointCreationText);
-      return result;
+      const sellingPoints = this.$store.getters["sellingPoints/all"];
+      if (sellingPoints.length > 0) {
+        let result = sellingPoints.map(sp => sp.name);
+
+        result.push(this.newSellingPointCreationText);
+        return result;
+      } else {
+        return [this.newSellingPointCreationText];
+      }
+    },
+    sellingPointCategories() {
+      const categoriesObj = this.$store.getters["categories/all"];
+
+      let categories = [];
+
+      for (let cat in categoriesObj) {
+        categories.push(categoriesObj[cat].title);
+      }
+
+      return categories;
+    },
+    categories() {
+      return this.$store.getters["categories/all"];
     },
   },
   created() {},
@@ -182,58 +232,77 @@ export default {
       this.selectedSellingPointCategoryError = false;
       this.selectedSellingPointCategory = value;
     },
-    createExpense() {
-      let foundInputError = false;
-      let foundInputErrorForNewSellingPoint = false;
-      // If there is no input from the user block the creation
-      if (this.sum === 0) {
-        this.enteredSumError = true;
-        foundInputError = true;
-      }
-      if (this.selectedSellingPoint === "") {
-        this.selectedSellingPointError = true;
-        foundInputError = true;
-      }
+    async createExpense() {
+      try {
+        let newSellingPointCreated = false;
+        let foundInputError = false;
+        let foundInputErrorForNewSellingPoint = false;
+        // If there is no input from the user block the creation
+        if (this.sum === 0) {
+          this.enteredSumError = true;
+          foundInputError = true;
+        }
+        if (this.selectedSellingPoint === "") {
+          this.selectedSellingPointError = true;
+          foundInputError = true;
+        }
 
-      // only check if the user wants to create a new selling point, the last item of the sellingPointCategories is "create new selling point"
-      if (this.selectedSellingPoint === this.newSellingPointCreationText) {
-        if (this.selectedSellingPointCategory === "") {
-          this.sellingPointCategoryError = true;
-          foundInputErrorForNewSellingPoint = true;
+        // only check if the user wants to create a new selling point, the last item of the sellingPointCategories is "create new selling point"
+        if (this.selectedSellingPoint === this.newSellingPointCreationText) {
+          if (this.selectedSellingPointCategory === "") {
+            this.sellingPointCategoryError = true;
+            foundInputErrorForNewSellingPoint = true;
+          }
+          if (this.enteredSellingPointName === "") {
+            this.enteredSellingPointNameError = true;
+            foundInputErrorForNewSellingPoint = true;
+          }
+          if (this.enteredSellingPointInitials === "") {
+            this.enteredSellingPointInitalsError = true;
+            foundInputErrorForNewSellingPoint = true;
+          }
+          if (this.selectedSellingPointCategory === "") {
+            this.selectedSellingPointCategoryError = true;
+            foundInputErrorForNewSellingPoint = true;
+          }
         }
-        if (this.enteredSellingPointName === "") {
-          this.enteredSellingPointNameError = true;
-          foundInputErrorForNewSellingPoint = true;
-        }
-        if (this.enteredSellingPointInitials === "") {
-          this.enteredSellingPointInitalsError = true;
-          foundInputErrorForNewSellingPoint = true;
-        }
-        if (this.selectedSellingPointCategory === "") {
-          this.selectedSellingPointCategoryError = true;
-          foundInputErrorForNewSellingPoint = true;
-        }
-      }
 
-      if (
-        !foundInputErrorForNewSellingPoint &&
-        this.selectedSellingPoint ===
-          this.sellingPointCategories[this.sellingPointCategories.length - 1]
-      ) {
-        // last item is create new one
-        //TODO: API call to create the expense  and if new selling point first create selling point and than the expense
-        console.log("API CALL TO CREATE A NEW SELLING POINT");
-      }
+        if (
+          !foundInputErrorForNewSellingPoint &&
+          this.selectedSellingPoint === this.newSellingPointCreationText
+        ) {
+          newSellingPointCreated = await this.$store.dispatch(
+            "sellingPoints/add",
+            {
+              name: this.enteredSellingPointName,
+              initials: this.enteredSellingPointInitials,
+              category: this.categories.find(
+                cat => cat.title === this.selectedSellingPointCategory,
+              ).title,
+              color: this.hex,
+            },
+          );
+        }
 
-      // add in the if the return of the new selling point post await
-      if (!foundInputError) {
-        console.log("API CALL FOR CREATING A NEW EXPENSE ");
-        this.$emit("created", {
-          type: this.spontaneous ? "spontaneous" : "monthly",
-          sellingPoint: "IDSELLINGPOINT",
-          sum: this.sum,
-          vault: "VAULTID",
-        });
+        // add in the if the return of the new selling point post await
+        if (!foundInputError && !foundInputErrorForNewSellingPoint) {
+          const expense = {
+            sum: this.sum,
+            type: this.spontaneous ? "spontaneous" : "monthly",
+            sellingPoint: newSellingPointCreated
+              ? newSellingPointCreated._id
+              : this.$store.getters["sellingPoints/all"].find(
+                  sp => sp.name === this.selectedSellingPoint,
+                )._id,
+            vault: this.$store.getters["vault/id"],
+          };
+
+          this.$store.dispatch("expenses/create", expense);
+
+          this.$emit("created", true);
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     cancelCreation() {

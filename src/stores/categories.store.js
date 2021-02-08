@@ -8,7 +8,7 @@ const state = {
 };
 
 const getters = {
-  name: state => {
+  all: state => {
     return state.categories;
   },
 };

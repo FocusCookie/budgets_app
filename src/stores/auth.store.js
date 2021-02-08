@@ -6,6 +6,18 @@ import { store } from "@/services/store.service.js";
 import { VaultService } from "../services/vault.service";
 import { CategoriesService } from "../services/categories.service";
 import { SellingPointsService } from "../services/sellingPoints.service";
+import { ExpensesService } from "../services/expenses.service";
+
+function removeAllData() {
+  TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
+  UserService.local.removeUser(); // remove all stored user information from the localStorage
+  VaultService.local.removeVault(); // remove the vault informations form the localStorage
+  VaultService.local.removeVaults(); // remove all vaults where the user has access to
+  CategoriesService.local.removeAll(); // remove all vaults where the user has access to
+  SellingPointsService.local.removeAll(); // remove all vaults where the user has access to
+  ExpensesService.local.removeExpensesCurrentMonth();
+  ExpensesService.local.removeExpensesFromTo();
+}
 
 const state = {
   authenticating: false,
@@ -125,8 +137,8 @@ const actions = {
       TokenService.saveAccessToken(tokens.accessToken);
       TokenService.saveRefreshToken(tokens.refreshToken);
 
-      // Redirect the user to the page he first tried to visit or to the home view
-      router.push(router.history.current.query.redirect || "/home");
+      // Redirect the user to the page he first tried to visit or to the route view
+      router.push(router.history.current.query.redirect || "/");
 
       return true;
     } catch (e) {
@@ -145,21 +157,11 @@ const actions = {
     try {
       TokenService.removeAccessToken();
       await AuthService.logout(state.refreshToken);
-      TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
-      UserService.local.removeUser(); // remove all stored user information from the localStorage
-      VaultService.local.removeVault(); // remove the vault informations form the localStorage
-      VaultService.local.removeVaults(); // remove all vaults where the user has access to
-      CategoriesService.local.removeAll(); // remove all vaults where the user has access to
-      SellingPointsService.local.removeAll(); // remove all vaults where the user has access to
+      removeAllData();
       context.commit("logoutSuccess");
       router.push("/login");
     } catch (err) {
-      TokenService.removeRefreshToken(); // can be deleted after the refreshToken was deleted by the backend
-      UserService.local.removeUser(); // remove all stored user information from the localStorage
-      VaultService.local.removeVault(); // remove the vault informations form the localStorage
-      VaultService.local.removeVaults(); // remove all vaults where the user has access to
-      CategoriesService.local.removeAll(); // remove all vaults where the user has access to
-      SellingPointsService.local.removeAll(); // remove all vaults where the user has access to
+      removeAllData();
       context.commit("logoutSuccess");
       router.push("/login");
       console.log(err);

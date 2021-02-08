@@ -14,7 +14,7 @@ const CategoriesService = {
       localStorage.setItem(CATEGORIES, JSON.stringify(categories));
     },
     getAll() {
-      return localStorage.getItem(CATEGORIES);
+      return JSON.parse(localStorage.getItem(CATEGORIES));
     },
     removeAll() {
       return localStorage.removeItem(CATEGORIES);

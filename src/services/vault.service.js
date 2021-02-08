@@ -15,8 +15,8 @@ const VaultService = {
 
     async get(id) {
       if (!id) throw { name: "GET vault/id", message: "No ID given" };
-
-      return await ApiService.get(`vaults/${id}`);
+      const result = await ApiService.get(`vaults/${id}`);
+      return result;
     },
 
     async create(name) {

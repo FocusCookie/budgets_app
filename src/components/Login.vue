@@ -48,7 +48,6 @@
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
 import { UserService } from "@/services/user.service.js";
-import { SellingPointsService } from "@/services/sellingPoints.service.js";
 
 export default {
   name: "Login",
@@ -114,16 +113,14 @@ export default {
           // check and set  all accessable vaults
           await this.$store.dispatch("vault/setAllVaults");
 
-          // push all the users sellingPoints and the sellingPoints where the user has access to form the choosen vault
-          const userSellingPoints = await SellingPointsService.api.getAll();
-          const vaultSellingPoints = this.$store.getters["vault/sellingPoints"];
-          await this.$store.dispatch("sellingPoints/setAll", [
-            ...userSellingPoints,
-            ...vaultSellingPoints,
-          ]);
+          // set the sellingPoints (combined from vault and user)
+          await this.$store.dispatch("sellingPoints/setAll");
 
           // get all categories and set them locally
           await this.$store.dispatch("categories/setAll");
+
+          // load all expenses from the mainVault
+          await this.$store.dispatch("expenses/currentMonth");
 
           this.loadingAuthData = false;
         }

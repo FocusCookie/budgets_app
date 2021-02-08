@@ -45,7 +45,7 @@
         <v-btn
           v-if="!firstVault"
           rounded
-          x-large
+          small
           color="secondary"
           text
           @click="cancel"
@@ -53,7 +53,7 @@
           Cancel
         </v-btn>
 
-        <v-btn rounded x-large color="primary" @click="submit">
+        <v-btn rounded small color="primary" @click="submit">
           Create vault
         </v-btn>
       </div>
@@ -108,6 +108,8 @@ export default {
           await this.$store.dispatch("user/setMainVault", vault._id);
 
           await this.$store.dispatch("vault/setAllVaults");
+
+          this.$store.dispatch("expenses/reset");
 
           this.creatingVault = false;
           this.name = "";

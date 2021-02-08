@@ -1,4 +1,5 @@
 import { VaultService } from "@/services/vault.service.js";
+import { ApiService } from "@/services/api.service.js";
 
 const state = {
   name: VaultService.local.getName(),
@@ -87,7 +88,10 @@ const mutations = {
 const actions = {
   set: async (context, id) => {
     try {
-      let vault = await VaultService.api.get(id);
+      context.commit("vaultRequest");
+      VaultService.local.removeVault();
+
+      const vault = await ApiService.get(`vaults/${id}`);
 
       VaultService.local.setVault(vault);
 
@@ -107,7 +111,7 @@ const actions = {
 
   setAllVaults: async context => {
     try {
-      let vaults = await VaultService.api.getAll();
+      const vaults = await VaultService.api.getAll();
 
       VaultService.local.setAllVaults(vaults);
 

@@ -35,15 +35,15 @@
       />
 
       <div class="buttonsWrapper">
-        <v-btn rounded x-large color="secondary" text @click="cancel">
+        <v-btn small rounded color="secondary" text @click="cancel">
           Cancel
         </v-btn>
 
-        <v-btn rounded x-large color="error" text @click="deleteVault">
+        <v-btn small rounded color="error" text @click="deleteVault">
           Delete
         </v-btn>
 
-        <v-btn rounded x-large color="primary" @click="submit">
+        <v-btn small rounded color="primary" @click="submit">
           save vault
         </v-btn>
       </div>
@@ -123,6 +123,14 @@ export default {
           "user/setMainVault",
           vaultWithAccessTo[0]._id,
         );
+
+        // set the sellingPoints (combined from vault and user)
+        await this.$store.dispatch("sellingPoints/setAll");
+
+        this.$store.dispatch("expenses/reset");
+
+        // load all expenses from the mainVault
+        await this.$store.dispatch("expenses/currentMonth");
 
         this.$emit("deleted", true);
       } else {
