@@ -94,6 +94,7 @@ export default {
   overflow: hidden;
   padding: 0 15px;
   position: fixed;
+  min-height: 45px;
   top: 0;
   width: 100%;
   z-index: 100;
