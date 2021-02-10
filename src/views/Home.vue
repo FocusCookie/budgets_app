@@ -191,7 +191,6 @@ export default {
     },
     cancelCreatingExpense() {
       this.createDialog = false;
-      console.log("CANCELED CRATE EXPENSE");
     },
     editedExpense() {
       this.editDialog = false;
