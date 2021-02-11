@@ -31,7 +31,7 @@
           :vault="vault"
           @changed="closeEditVaultDialog"
           @canceled="closeEditVaultDialog"
-          @deleted="closeEditVaultDialog"
+          @deleted="deleteVault"
         />
       </v-card>
     </v-dialog>
@@ -85,6 +85,28 @@ export default {
       }
     },
     closeEditVaultDialog() {
+      this.showVaultEditDialog = false;
+    },
+    async deleteVault() {
+      // check if there is another vault to set as main vault, if not set firstTime user
+      //check if mainVault is set
+      const mainVault = this.$store.getters["user/mainVault"];
+
+      // if no mainVault is set check if the user has access to other vaults
+      if (!mainVault) {
+        // check and set  all accessable vaults
+        const vaults = await this.$store.dispatch("vault/setAllVaults");
+
+        // if the user has access to vaults set the mainVault to the first vault
+        if (vaults.length > 0) {
+          await UserService.api.setMainVault(vaults[0]._id);
+        } else {
+          // set firstTime user
+          await this.$store.dispatch("user/setMainVault", "");
+          await this.$store.dispatch("user/setFirstTimeUser", true);
+        }
+      }
+
       this.showVaultEditDialog = false;
     },
   },

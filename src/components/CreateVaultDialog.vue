@@ -1,47 +1,54 @@
 <template>
-  <div>
-    <span class="text-h6 primary--text font-weight-bold text-uppercase"
-      >Create new vault</span
-    >
+  <v-dialog
+    v-model="display"
+    content-class="ma-0 px-3 rounded-0"
+    fluid
+    persistent
+    transition="dialog-bottom-transition"
+    scrollable
+  >
+    <v-card class="text-left rounded-xl">
+      <v-card-title
+        class="headline white--text font-weight-bold text-h6 pa-2 text-uppercase"
+      >
+        Create your first vault
+      </v-card-title>
 
-    <v-progress-circular
-      v-if="creatingVault"
-      :size="100"
-      color="primary"
-      indeterminate
-    />
+      <v-card-text class="pt-3 pb-0 px-4">
+        <v-card
+          v-if="firstVault"
+          class="pa-3  rounded-lg primary"
+          dark
+          outlined
+        >
+          Hey
+          <span class="font-weight-bold">{{
+            this.$store.getters["user/name"]
+          }}</span>
+          👋, it seems that you start are just start using budgets! Nice 👍!
+          Please create your first own vault, where you can collect all your
+          expenses. Or ask a friend to add you to their vault to have a shared
+          vault.
+        </v-card>
 
-    <v-card
-      v-if="firstVault"
-      class="mx-auto pa-2 mb-6 rounded-lg primary"
-      dark
-      outlined
-    >
-      Hey
-      <span class="font-weight-bold">{{
-        this.$store.getters["user/name"]
-      }}</span>
-      👋, it seems that you start are just start using budgets! Nice 👍! Please
-      create your first own vault, where you can collect all your expenses. Or
-      ask a friend to add you to their vault to have a shared vault.
-    </v-card>
+        <form v-if="!creatingVault" class="mt-4" @keyup.enter="submit">
+          <v-text-field
+            v-model="name"
+            :error-messages="nameErrors"
+            label="Name"
+            :counter="30"
+            required
+            rounded
+            outlined
+            clearable
+            prepend-inner-icon="mdi-safe"
+            @input="$v.name.$touch()"
+            @blur="$v.name.$touch()"
+          />
+        </form>
+      </v-card-text>
 
-    <form v-if="!creatingVault" class="mt-4" @keyup.enter="submit">
-      <v-text-field
-        v-model="name"
-        :error-messages="nameErrors"
-        label="Name"
-        :counter="30"
-        required
-        rounded
-        outlined
-        clearable
-        prepend-inner-icon="mdi-safe"
-        @input="$v.name.$touch()"
-        @blur="$v.name.$touch()"
-      />
-
-      <div class="buttonsWrapper">
+      <v-card-actions class="px-4 pb-4">
         <v-btn
           v-if="!firstVault"
           rounded
@@ -53,12 +60,14 @@
           Cancel
         </v-btn>
 
+        <v-spacer />
+
         <v-btn rounded small color="primary" @click="submit">
           Create vault
         </v-btn>
-      </div>
-    </form>
-  </div>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -73,7 +82,7 @@ export default {
   validations: {
     name: { required, minLength: minLength(3), maxLength: maxLength(30) },
   },
-  props: ["firstVault"],
+  props: ["display"],
   data() {
     return {
       name: "",
@@ -81,6 +90,9 @@ export default {
     };
   },
   computed: {
+    firstVault() {
+      return this.$store.getters["user/firstTimeUser"];
+    },
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
@@ -111,6 +123,10 @@ export default {
 
           this.$store.dispatch("expenses/reset");
 
+          if (this.firstVault) {
+            await this.$store.dispatch("user/setFirstTimeUser", false);
+          }
+
           this.creatingVault = false;
           this.name = "";
           this.$emit("created", true);
@@ -132,5 +148,11 @@ export default {
 .buttonsWrapper {
   display: flex;
   justify-content: space-between;
+}
+
+.headline {
+  background: var(--v-primary-base);
+  display: flex;
+  justify-content: center;
 }
 </style>

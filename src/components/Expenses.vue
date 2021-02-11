@@ -12,7 +12,7 @@
 
     <div class="sellingPointIcon">
       <v-icon>
-        {{ categories.find(cat => cat.title === sellingPoint.category).icon }}
+        {{ icon }}
       </v-icon>
     </div>
 
@@ -36,7 +36,7 @@
         fab
         x-small
         color="secondary"
-        @click="emitEdit"
+        @click="showExpenseEditDialog = !showExpenseEditDialog"
       >
         <v-icon small dark>
           mdi-pen
@@ -49,32 +49,85 @@
         expenseSum font-weight-bold text-right text-h2 secondary--text
       "
     >
-      {{ expense.sum }} €
+      {{ expenseToDisplay.sum }} €
+      <br />
+      <span class="overline">
+        {{ expenseToDisplay.dateCreated.split("T")[0] }}
+      </span>
     </div>
+
+    <EditExpenseDialog
+      :display="showExpenseEditDialog"
+      :expense="expenseToDisplay"
+      :selling-point="sellingPoint"
+      @saved="expenseWasEdited"
+      @canceled="closeEditExpenseDialog"
+      @deleted="closeEditExpenseDialog"
+    />
   </div>
 </template>
 
 <script>
+import EditExpenseDialog from "@/components/EditExpenseDialog.vue";
+
 export default {
   name: "Expenses",
+  components: { EditExpenseDialog },
   props: ["expense"],
   data() {
-    return {};
+    return {
+      showExpenseEditDialog: false,
+      expenseToDisplay: {},
+    };
   },
   computed: {
     sellingPoint() {
       const sellingPoints = this.$store.getters["sellingPoints/all"];
+      const sellingPoint = sellingPoints.find(
+        sp => sp._id === this.expenseToDisplay.sellingPoint,
+      );
 
-      return sellingPoints.find(sp => sp._id === this.expense.sellingPoint);
+      return sellingPoint
+        ? sellingPoint
+        : {
+            name: "",
+            category: "",
+            color: "",
+            initials: "",
+            owner: "",
+            icon: "",
+            _id: "",
+          };
     },
+
     categories() {
       return this.$store.getters["categories/all"];
     },
+
+    icon() {
+      // this is necessary because in case of switching the vault the expenses are used from the vault before and throw errors
+      // this is not visible for the user, but it happens for once circle in the app
+      if (this.sellingPoint.category !== "") {
+        return this.categories.find(
+          cat => cat.title === this.sellingPoint.category,
+        ).icon;
+      } else {
+        return "mdi-alert";
+      }
+    },
   },
-  created() {},
+  created() {
+    this.expenseToDisplay = this.expense;
+  },
   methods: {
-    emitEdit() {
-      this.$emit("edit", this.expense);
+    closeEditExpenseDialog() {
+      this.showExpenseEditDialog = false;
+    },
+    expenseWasEdited(changedExpense) {
+      this.expenseToDisplay = changedExpense
+        ? changedExpense
+        : this.expenseToDisplay;
+      this.showExpenseEditDialog = false;
     },
   },
 };

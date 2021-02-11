@@ -1,25 +1,22 @@
 <template>
   <div id="homeContainer" class="py-1">
-    <h1 v-if="newUser">
-      Welcome 👋
-    </h1>
-
     <div id="expensesContainer">
       <div :class="typeToShow !== 'monthly' ? 'slide' : 'slide toMonthly'">
         <div
           :class="typeToShow !== 'monthly' ? 'list px-3' : 'list px-3 fadeOut'"
         >
+          <v-card
+            v-if="noSpontanExpenses"
+            key="noteNoSpontan"
+            class="pa-4 mt-4 rounded-lg"
+            outlined
+            rounded
+          >
+            So far no spontaneous expenses this month!
+          </v-card>
           <transition-group name="list" tag="div">
             >
-            <v-card
-              v-if="spontaneousExpenses.length === 0"
-              key="noteNoSpontan"
-              class="pa-4 mt-4 rounded-lg"
-              outlined
-              rounded
-            >
-              So far no spontaneous expenses this month!
-            </v-card>
+
             <Expenses
               v-for="expense in spontaneousExpenses"
               :key="`${expense._id}-${expense.dateCreated}`"
@@ -86,79 +83,35 @@ export default {
       createDialog: false,
       editDialog: false,
       typeToShow: "spontaneous",
-      devExpenses: [
-        {
-          dateCreated: "20:01:52",
-          sum: 24.65,
-          type: "spontaneous",
-          sellingPoint: {
-            name: "DEV Alnatura",
-            initials: "AN",
-            icon: "🛒",
-            category: "food groceries",
-            color: "primary",
-          },
-        },
-        {
-          dateCreated: "20:33:50",
-          sum: 14.99,
-          type: "monthly",
-          sellingPoint: {
-            name: "DEV Netflix",
-            initials: "NF",
-            icon: "📽",
-            category: "movie streaming",
-            color: "secondary",
-          },
-        },
-        {
-          dateCreated: "20:34:52",
-          sum: 11.44,
-          type: "spontaneous",
-          sellingPoint: {
-            name: "DEV REWE",
-            initials: "RW",
-            icon: "🛒",
-            category: "food groceries",
-            color: "success",
-          },
-        },
-        {
-          dateCreated: "20:53:52",
-          sum: 14.99,
-          type: "monthly",
-          sellingPoint: {
-            name: "DEV Amazon Prime",
-            initials: "AM",
-            icon: "📽",
-            category: "movie streaming",
-            color: "error",
-          },
-        },
-      ],
       toggleNew: true,
       selectedExpenseToEdit: null,
     };
   },
   computed: {
     expenses() {
-      const exp = this.$store.getters["expenses/currentMonth"];
-      return exp ? exp.reverse() : [];
+      return this.$store.getters["expenses/currentMonth"];
     },
     monthlyExpenses() {
-      return this.expenses.filter(expense => expense.type === "monthly");
+      const monthly = this.expenses.filter(
+        expense => expense.type === "monthly",
+      );
+
+      return monthly.length > 0 ? monthly : [];
     },
     spontaneousExpenses() {
-      return this.expenses.filter(expense => expense.type === "spontaneous");
-    },
-    newUser() {
-      return this.$store.getters["user/firstTimeLoggedIn"];
+      const spontaneous = this.expenses.filter(
+        expense => expense.type === "spontaneous",
+      );
+      return spontaneous.length > 0 ? spontaneous : [];
     },
     mainVault() {
       return this.$store.getters["user/mainVault"];
     },
+    noSpontanExpenses() {
+      return this.spontaneousExpenses.length === 0 || !this.spontaneousExpenses;
+    },
   },
-  async created() {},
+  created() {},
   methods: {
     expenseSuccessfullyCreated() {
       this.createDialog = false;
@@ -168,23 +121,6 @@ export default {
     },
     startCreation() {
       this.createDialog = true;
-    },
-    pushExpense() {
-      this.createDialog = true;
-
-      this.expenses.unshift({
-        dateCreated: new Date(),
-        sum: 24 + Math.random(),
-        type: this.toggleNew ? "monthly" : "spontaneous",
-        sellingPoint: {
-          name: "DEV NEW",
-          initials: "NW",
-          icon: "🛒",
-          category: "food groceries",
-          color: "primary",
-        },
-      });
-      this.toggleNew = !this.toggleNew;
     },
     createdExpense() {
       this.createDialog = false;

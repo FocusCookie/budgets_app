@@ -6,6 +6,7 @@ const state = {
   name: UserService.local.getName(),
   role: UserService.local.getRole(),
   mainVault: UserService.local.getMainVault(),
+  firstTimeLoggedIn: UserService.local.getFirstTime(),
 };
 
 const getters = {
@@ -20,6 +21,9 @@ const getters = {
   },
   mainVault: () => {
     return state.mainVault;
+  },
+  firstTimeUser: () => {
+    return state.firstTimeLoggedIn;
   },
 };
 
@@ -37,6 +41,10 @@ const mutations = {
 
   mainVault(state, vault) {
     state.mainVault = vault;
+  },
+
+  firstTimeUser(state, firstTime) {
+    state.firstTimeLoggedIn = firstTime;
   },
 };
 
@@ -72,6 +80,11 @@ const actions = {
   setMainVault: (context, vault) => {
     UserService.local.saveMainVault(vault);
     context.commit("mainVault", vault);
+  },
+
+  setFirstTimeUser: (context, firstTime) => {
+    UserService.local.saveFirstTime(firstTime);
+    context.commit("firstTimeUser", firstTime);
   },
 };
 

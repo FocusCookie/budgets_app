@@ -1,47 +1,33 @@
 <template>
   <v-app light>
-    <v-container v-if="!loggedIn">
-      <div v-if="registered">
-        <p class="title">
-          {{ name }} you have been successfully registered 🎉!
-        </p>
-        <p>You can now login with your email and password.</p>
-      </div>
-      <Login @ />
+    <div
+      v-if="loggedIn"
+      id="header"
+      :class="fullScreenHeader ? 'full-height' : ''"
+    >
+      <Header @fullscreen="displayHeaderFullscreen" />
+    </div>
 
-      <br />
+    <div id="content">
+      <!-- use a dynamic transition name -->
+      <transition name="router-view-fade" mode="out-in">
+        <router-view />
+      </transition>
+    </div>
 
-      <Register @registered="showLoginMsgAfterRegistration" />
-    </v-container>
-
-    <div v-if="loggedIn">
-      <div id="header" :class="fullScreenHeader ? 'full-height' : ''">
-        <Header @fullscreen="displayHeaderFullscreen" />
-      </div>
-
-      <div v-if="mainVault" id="content">
-        <!-- use a dynamic transition name -->
-        <transition name="router-view-fade" mode="out-in">
-          <router-view />
-        </transition>
-      </div>
-
-      <div id="nav">
-        <BottomNavBar />
-      </div>
+    <div v-if="loggedIn" id="nav">
+      <BottomNavBar />
     </div>
   </v-app>
 </template>
 
 <script>
 import BottomNavBar from "./components/BottomNavBar";
-import Login from "./components/Login.vue";
-import Register from "./components/Register.vue";
 import Header from "./components/Header.vue";
 
 export default {
   name: "Budgets",
-  components: { BottomNavBar, Login, Register, Header },
+  components: { BottomNavBar, Header },
   props: {},
   data() {
     return {
@@ -54,18 +40,9 @@ export default {
     loggedIn() {
       return this.$store.getters["auth/loggedIn"];
     },
-    mainVault() {
-      return this.$route.path === "/settings"
-        ? true
-        : this.$store.getters["user/mainVault"];
-    },
   },
   created() {},
   methods: {
-    showLoginMsgAfterRegistration(name) {
-      this.registered = true;
-      this.name = name;
-    },
     displayHeaderFullscreen(v) {
       this.fullScreenHeader = v;
     },

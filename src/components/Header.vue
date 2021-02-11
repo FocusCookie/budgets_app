@@ -34,15 +34,11 @@
       </div>
     </v-expand-transition>
 
-    <v-dialog v-model="showCreateVaultDialog" :persistent="firstVault">
-      <v-card class="pa-4 rounded-xl">
-        <CreateVaultDialog
-          :first-vault="firstVault"
-          @created="closeCreateVaultDialog"
-          @canceled="closeCreateVaultDialog"
-        />
-      </v-card>
-    </v-dialog>
+    <CreateVaultDialog
+      :display="showCreateVaultDialog || firstVault"
+      @created="closeCreateVaultDialog"
+      @canceled="closeCreateVaultDialog"
+    />
   </div>
 </template>
 
@@ -75,7 +71,7 @@ export default {
         : "Please create a vault to start";
     },
     firstVault() {
-      return this.mainVault ? false : true;
+      return this.$store.getters["user/firstTimeUser"];
     },
   },
   watch: {

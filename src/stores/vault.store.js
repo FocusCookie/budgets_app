@@ -83,6 +83,15 @@ const mutations = {
   setSellingPoints(state, sellingPoints) {
     state.sellingPoints = sellingPoints;
   },
+
+  reset(state) {
+    state.name = "";
+    state.owner = "";
+    state.sellingPoints = "";
+    state.shared = "";
+    state._id = "";
+    state.vaults = [];
+  },
 };
 
 const actions = {
@@ -127,6 +136,12 @@ const actions = {
       }
       return false;
     }
+  },
+
+  reset: context => {
+    VaultService.local.removeVault();
+    VaultService.local.removeVaults();
+    context.commit("reset");
   },
 };
 

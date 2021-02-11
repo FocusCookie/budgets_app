@@ -2,6 +2,7 @@ const USER_NAME = "userName";
 const USER_ID = "userId";
 const USER_ROLE = "userRole";
 const USER_MAIN_VAULT = "userMainVault";
+const USER_FIRST_TIME = "userFirstTime";
 
 import { ApiService } from "@/services/api.service.js";
 import { store } from "@/services/store.service.js";
@@ -28,6 +29,13 @@ const UserService = {
       await store.dispatch("user/setMainVault", vault);
       return true;
     },
+
+    async resetMainVault() {
+      await ApiService.delete(`users/${store.getters["user/id"]}/mainvault`);
+
+      await store.dispatch("user/setMainVault", "");
+      return true;
+    },
   },
   local: {
     saveUser(user) {
@@ -47,11 +55,16 @@ const UserService = {
       localStorage.removeItem(USER_ID);
       localStorage.removeItem(USER_ROLE);
       localStorage.removeItem(USER_MAIN_VAULT);
+      localStorage.removeItem(USER_FIRST_TIME);
     },
 
     saveMainVault(vault) {
       const vaultValue = vault !== "" && vault !== undefined ? vault : "";
       localStorage.setItem(USER_MAIN_VAULT, vaultValue);
+    },
+
+    saveFirstTime(firstTime) {
+      localStorage.setItem(USER_FIRST_TIME, JSON.stringify(firstTime));
     },
 
     getName() {
@@ -65,6 +78,9 @@ const UserService = {
     },
     getMainVault() {
       return localStorage.getItem(USER_MAIN_VAULT);
+    },
+    getFirstTime() {
+      return JSON.parse(localStorage.getItem(USER_FIRST_TIME));
     },
   },
 };

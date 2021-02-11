@@ -4,6 +4,7 @@ import { store } from "@/services/store.service.js";
 const state = {
   expensesCurrentMonth: ExpensesService.local.getExpensesCurrentMonth(),
   expensesFromTo: ExpensesService.local.getExpensesFromTo(),
+  editingExpenseRequest: false,
   requestingExpensesCurrentMonth: false,
   requestingExpensesFromTo: false,
   creatingExpenseRequest: false,
@@ -18,9 +19,29 @@ const getters = {
   fromTo: state => {
     return state.expensesFromTo;
   },
+  expenseById: state => id => {
+    return state.expensesCurrentMonth.find(exp => exp._id === id);
+  },
 };
 
 const mutations = {
+  editingExpenseRequest(state) {
+    state.editingExpenseRequest = true;
+    state.expensesError = "";
+    state.expensesErrorStatus = 0;
+  },
+
+  editingExpenseSuccess(state, expenses) {
+    state.editingExpenseRequest = false;
+    state.expensesCurrentMonth = expenses;
+  },
+
+  editingExpenseError(state, { errorCode, errorMessage }) {
+    state.editingExpenseRequest = false;
+    state.expensesError = errorCode;
+    state.expensesErrorStatus = errorMessage;
+  },
+
   creatingExpenseRequest(state) {
     state.creatingExpenseRequest = true;
     state.expensesError = "";
@@ -136,6 +157,32 @@ const actions = {
 
       context.commit("creatingExpenseSuccess", expenses);
       return createdExpense;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
+
+  edit: async (context, expense) => {
+    try {
+      context.commit("editingExpenseRequest");
+
+      const id = expense._id;
+      delete expense._id; // not changable, so its not allowed in the PUT
+
+      let expenses = store.getters["expenses/currentMonth"];
+
+      const editedExpense = await ExpensesService.api.edit(id, expense);
+
+      const editedExpenseIndex = expenses.findIndex(exp => exp._id === id);
+
+      expenses[editedExpenseIndex] = editedExpense;
+
+      ExpensesService.local.setExpensesCurrentMonth(expenses);
+
+      context.commit("editingExpenseSuccess", expenses);
+
+      return editedExpense;
     } catch (error) {
       console.log(error);
       return false;

@@ -110,27 +110,40 @@ export default {
     },
     async deleteVault() {
       if (this.name === this.vault.name) {
+        const mainVault = this.$store.getters["user/mainVault"];
+
         await VaultService.api.delete(this.vault._id);
+
+        // check if the deleted vault was the main vault, if so check if there other vault where the user has access to and set the first as main vault
+        if (this.vault._id === mainVault) {
+          await this.$store.dispatch("user/setMainVault", "");
+          await UserService.api.resetMainVault();
+          await this.$store.dispatch("vault/reset");
+          await this.$store.dispatch("sellingPoints/reset");
+          await this.$store.dispatch("expenses/reset");
+        }
 
         const vaultWithAccessTo = await this.$store.dispatch(
           "vault/setAllVaults",
         );
 
-        await UserService.api.setMainVault(vaultWithAccessTo[0]._id);
+        if (vaultWithAccessTo.length > 0) {
+          await UserService.api.setMainVault(vaultWithAccessTo[0]._id);
+          await this.$store.dispatch("vault/set", vaultWithAccessTo[0]._id);
+          await this.$store.dispatch(
+            "user/setMainVault",
+            vaultWithAccessTo[0]._id,
+          );
+          // set the sellingPoints (combined from vault and user)
+          await this.$store.dispatch("sellingPoints/setAll");
 
-        await this.$store.dispatch("vault/set", vaultWithAccessTo[0]._id);
-        await this.$store.dispatch(
-          "user/setMainVault",
-          vaultWithAccessTo[0]._id,
-        );
+          this.$store.dispatch("expenses/reset");
 
-        // set the sellingPoints (combined from vault and user)
-        await this.$store.dispatch("sellingPoints/setAll");
-
-        this.$store.dispatch("expenses/reset");
-
-        // load all expenses from the mainVault
-        await this.$store.dispatch("expenses/currentMonth");
+          // load all expenses from the mainVault
+          await this.$store.dispatch("expenses/currentMonth");
+        } else {
+          await this.$store.dispatch("user/setFirstTimeUser", true);
+        }
 
         this.$emit("deleted", true);
       } else {

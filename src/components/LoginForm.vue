@@ -107,7 +107,14 @@ export default {
             // if the user has access to vaults set the mainVault to the first vault
             if (vaults.length > 0) {
               await UserService.api.setMainVault(vaults[0]._id);
+              await this.$store.dispatch("user/setFirstTimeUser", false);
+            } else {
+              // set firstTime user
+              await UserService.local.saveMainVault("");
+              await this.$store.dispatch("user/setFirstTimeUser", true);
             }
+          } else {
+            await this.$store.dispatch("user/setFirstTimeUser", false);
           }
 
           // check and set  all accessable vaults

@@ -48,6 +48,10 @@ const mutations = {
     state.sellingPointsError = errorCode;
     state.sellingPointsErrorCode = errorMessage;
   },
+
+  reset(state) {
+    state.sellingPoints = [];
+  },
 };
 
 const actions = {
@@ -117,6 +121,11 @@ const actions = {
       }
       return false;
     }
+  },
+
+  reset: context => {
+    context.commit("reset");
+    SellingPointsService.local.removeAll();
   },
 };
 

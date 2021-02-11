@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="open"
+    v-model="display"
     content-class="ma-0 px-3 rounded-0"
     fluid
     persistent
@@ -11,7 +11,7 @@
       <v-card-title
         class="headline white--text font-weight-bold text-h6 pa-2 text-uppercase"
       >
-        Create a new Expense
+        EDIT {{ sellingPoint.name }}
       </v-card-title>
       <v-card-text class="py-3 px-0 text-overline">
         <div class="px-3">
@@ -28,11 +28,11 @@
           </div>
 
           <v-text-field
+            v-model="sum"
             small
             class="py-4"
             color="primary"
             label="SUM"
-            placeholder="0.00"
             rounded
             outlined
             dense
@@ -45,6 +45,7 @@
           />
 
           <v-select
+            v-model="selectedSellingPoint"
             :items="sellingPointsToSelect"
             label="Selling Point"
             rounded
@@ -128,14 +129,14 @@
       <v-divider />
 
       <v-card-actions class="pa-4">
-        <v-btn small rounded color="error" text @click="cancelCreation">
+        <v-btn small rounded color="error" text @click="cancelEdit">
           Cancel
         </v-btn>
 
         <v-spacer />
 
-        <v-btn small color="primary" rounded dark @click="createExpense">
-          Create expense
+        <v-btn small color="primary" rounded dark @click="save">
+          Save
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -144,11 +145,11 @@
 
 <script>
 export default {
-  name: "CreateExpenseDialog",
+  name: "EditExpenseDialog",
+  props: ["expense", "sellingPoint", "display"],
   data() {
     return {
       newSellingPointCreationText: "create new selling point",
-      open: true,
       spontaneous: true,
       enteredSellingPointInitials: "",
       enteredSellingPointName: "",
@@ -171,15 +172,16 @@ export default {
       },
       type: "hex",
       hex: "#673AB7",
+      expenseBeforeEdit: null,
     };
   },
   computed: {
     color: {
       get() {
-        return this[this.type];
+        return this.type;
       },
       set(v) {
-        this[this.type] = v;
+        this.type = v;
       },
     },
     showColor() {
@@ -202,7 +204,7 @@ export default {
         result.push(this.newSellingPointCreationText);
         return result;
       } else {
-        return [this.newSellingPointCreationText];
+        return this.newSellingPointCreationText;
       }
     },
     sellingPointCategories() {
@@ -220,7 +222,15 @@ export default {
       return this.$store.getters["categories/all"];
     },
   },
-  created() {},
+  created() {
+    this.expenseBeforeEdit = { ...this.expense };
+
+    this.sum = this.expense.sum;
+    this.selectedSellingPoint = this.sellingPoint.name;
+    this.type = this.expense.type;
+
+    this.spontaneous = this.expense.type === "spontaneous" ? true : false;
+  },
   methods: {
     updateSum(v) {
       this.enteredSumError = false;
@@ -246,7 +256,7 @@ export default {
       this.selectedSellingPointCategoryError = false;
       this.selectedSellingPointCategory = value;
     },
-    async createExpense() {
+    async save() {
       try {
         let newSellingPointCreated = false;
         let foundInputError = false;
@@ -293,34 +303,45 @@ export default {
               category: this.categories.find(
                 cat => cat.title === this.selectedSellingPointCategory,
               ).title,
-              color: this.hex,
+              color: this.type,
             },
           );
         }
 
+        const expense = {
+          sum: this.sum,
+          type: this.spontaneous ? "spontaneous" : "monthly",
+          sellingPoint: newSellingPointCreated
+            ? newSellingPointCreated._id
+            : this.$store.getters["sellingPoints/all"].find(
+                sp => sp.name === this.selectedSellingPoint,
+              )._id,
+          _id: this.expenseBeforeEdit._id,
+        };
+
         // add in the if the return of the new selling point post await
         if (!foundInputError && !foundInputErrorForNewSellingPoint) {
-          const expense = {
-            sum: this.sum,
-            type: this.spontaneous ? "spontaneous" : "monthly",
-            sellingPoint: newSellingPointCreated
-              ? newSellingPointCreated._id
-              : this.$store.getters["sellingPoints/all"].find(
-                  sp => sp.name === this.selectedSellingPoint,
-                )._id,
-            vault: this.$store.getters["vault/id"],
-          };
+          if (
+            this.expenseBeforeEdit.sum !== expense.sum ||
+            this.expenseBeforeEdit.type !== expense.type ||
+            this.expenseBeforeEdit.sellingPoint !== expense.sellingPoint
+          ) {
+            const editedExpense = await this.$store.dispatch(
+              "expenses/edit",
+              expense,
+            );
 
-          this.$store.dispatch("expenses/create", expense);
-
-          this.$emit("created", true);
+            this.$emit("saved", editedExpense);
+          } else {
+            this.$emit("saved", false);
+          }
         }
       } catch (error) {
         console.log(error);
       }
     },
-    cancelCreation() {
-      this.$emit("cancel", false);
+    cancelEdit() {
+      this.$emit("canceled", true);
     },
   },
 };
