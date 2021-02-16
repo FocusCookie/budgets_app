@@ -167,14 +167,22 @@ const actions = {
       context.commit("creatingExpenseRequest");
 
       const currentExpenses = store.getters["expenses/currentMonth"];
-      const createdExpense = await ExpensesService.api.create(expense);
+      const createdExpenses = await ExpensesService.api.create(expense);
 
-      const expenses = [...currentExpenses, createdExpense];
+      let created = null;
+
+      if (Array.isArray(createdExpenses)) {
+        created = createdExpenses[0];
+      } else {
+        created = createdExpenses;
+      }
+
+      const expenses = [...currentExpenses, created];
 
       ExpensesService.local.setExpensesCurrentMonth(expenses);
 
       context.commit("creatingExpenseSuccess", expenses);
-      return createdExpense;
+      return created;
     } catch (error) {
       console.log(error);
       return false;

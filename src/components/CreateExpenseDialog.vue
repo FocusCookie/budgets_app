@@ -27,6 +27,66 @@
             </div>
           </div>
 
+          <div
+            v-if="!spontaneous"
+            class="d-flex justify-space-between align-center mt-3"
+          >
+            <span class="pl-4">Recurring</span>
+            <v-switch v-model="recurring" hide-details class="ma-0" inset />
+          </div>
+
+          <v-row v-if="recurring" justify="center" class="pa-3 mt-1">
+            <v-dialog
+              ref="dialog"
+              v-model="recurringLastMonthmodal"
+              :return-value.sync="recurringLastMonth"
+              persistent
+              width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="recurringLastMonth"
+                  :error="recurringLastMonthError"
+                  :rules="recurring ? [rules.required] : []"
+                  dense
+                  hide-details
+                  outlined
+                  rounded
+                  label="last Month of recurring the expense"
+                  append-icon="mdi-calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                />
+              </template>
+              <v-date-picker
+                v-model="recurringLastMonth"
+                color="primary"
+                type="month"
+                :min="nextMonth"
+                scrollable
+              >
+                <v-btn
+                  color="secondary"
+                  text
+                  @click="recurringLastMonthmodal = false"
+                >
+                  Cancel
+                </v-btn>
+
+                <v-spacer />
+
+                <v-btn
+                  color="primary"
+                  rounded
+                  @click="$refs.dialog.save(recurringLastMonth)"
+                >
+                  OK
+                </v-btn>
+              </v-date-picker>
+            </v-dialog>
+          </v-row>
+
           <v-text-field
             small
             class="py-4"
@@ -128,13 +188,13 @@
       <v-divider />
 
       <v-card-actions class="pa-4">
-        <v-btn small rounded color="error" text @click="cancelCreation">
+        <v-btn rounded color="error" text @click="cancelCreation">
           Cancel
         </v-btn>
 
         <v-spacer />
 
-        <v-btn small color="primary" rounded dark @click="createExpense">
+        <v-btn color="primary" rounded dark @click="createExpense">
           Create expense
         </v-btn>
       </v-card-actions>
@@ -160,7 +220,11 @@ export default {
       selectedSellingPointCategoryError: false,
       enteredSellingPointNameError: false,
       enteredSellingPointInitalsError: false,
+      recurringLastMonthError: false,
       sum: 0,
+      recurring: false,
+      recurringLastMonth: "",
+      recurringLastMonthmodal: false,
       rules: {
         required: value => !!value || "Required.",
         min: v => v.length >= 1 || "Min 1 character.",
@@ -219,6 +283,16 @@ export default {
     categories() {
       return this.$store.getters["categories/all"];
     },
+    nextMonth() {
+      const today = new Date();
+
+      return `${today.getFullYear()}-${today.getMonth() + 1}`;
+    },
+  },
+  watch: {
+    recurringLastMonth(v) {
+      v !== "" ? (this.recurringLastMonthError = false) : false;
+    },
   },
   created() {},
   methods: {
@@ -251,6 +325,7 @@ export default {
         let newSellingPointCreated = false;
         let foundInputError = false;
         let foundInputErrorForNewSellingPoint = false;
+
         // If there is no input from the user block the creation
         if (this.sum === 0) {
           this.enteredSumError = true;
@@ -281,6 +356,11 @@ export default {
           }
         }
 
+        // if expense is recurring
+        if (this.recurringLastMonth === "" && this.recurring) {
+          this.recurringLastMonthError = true;
+        }
+
         if (
           !foundInputErrorForNewSellingPoint &&
           this.selectedSellingPoint === this.newSellingPointCreationText
@@ -309,6 +389,8 @@ export default {
                   sp => sp.name === this.selectedSellingPoint,
                 )._id,
             vault: this.$store.getters["vault/id"],
+            recurring: this.recurring,
+            recurringLastMonth: this.recurringLastMonth,
           };
 
           this.$store.dispatch("expenses/create", expense);

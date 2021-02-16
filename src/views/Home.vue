@@ -111,7 +111,9 @@ export default {
       return this.spontaneousExpenses.length === 0 || !this.spontaneousExpenses;
     },
   },
-  created() {},
+  async created() {
+    await this.$store.dispatch("expenses/currentMonth"); // TODO: Remove when webstream function is build in, should only be releaded if
+  },
   methods: {
     expenseSuccessfullyCreated() {
       this.createDialog = false;
