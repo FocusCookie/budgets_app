@@ -16,7 +16,7 @@ Vue.config.productionTip = false;
 Vue.use(Vuelidate);
 
 // initialize the base url
-ApiService.init("http://127.0.0.1:3000/");
+ApiService.init("http://0.0.0.0:3000/");
 
 new Vue({
   store,

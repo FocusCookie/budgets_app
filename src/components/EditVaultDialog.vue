@@ -6,8 +6,8 @@
       >
         EDIT {{ vault.name }}
       </v-card-title>
-      <v-card-text class="px-3 pt-6 pb-0 text-overline">
-        <div v-if="deleteRequirementsMsg" class="mt-4">
+      <v-card-text class="px-3 pt-6 pb-0 body-1">
+        <div v-if="deleteRequirementsMsg">
           <p class="font-weight-bold">🚨 Deleting {{ vault.name }}</p>
           <p>
             To delete the vault, please type in

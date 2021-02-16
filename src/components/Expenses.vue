@@ -42,7 +42,7 @@
           }`
         "
       >
-        {{ expenseToDisplay.sum }} €
+        {{ parseFloat(expenseToDisplay.sum).toFixed(2) }} €
       </div>
 
       <div class="moreBtn text-center">

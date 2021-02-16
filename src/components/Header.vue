@@ -81,10 +81,10 @@ export default {
     },
   },
   async created() {
-    if (this.mainVault !== "" && this.mainVault !== undefined) {
-      await this.$store.dispatch("vault/set", this.mainVault);
-    } else {
+    if (this.firstVault) {
       this.showCreateVaultDialog = true;
+    } else {
+      await this.$store.dispatch("vault/set", this.mainVault);
     }
   },
   methods: {
