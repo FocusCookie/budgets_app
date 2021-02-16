@@ -26,7 +26,6 @@ const ExpensesService = {
     },
 
     async edit(id, expense) {
-      console.log("API ", expense);
       return ApiService.put(`expenses/${id}`, expense);
     },
 

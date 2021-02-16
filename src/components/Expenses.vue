@@ -151,8 +151,7 @@ export default {
     closeEditExpenseDialog() {
       this.showExpenseEditDialog = false;
     },
-    expenseDeleted(v) {
-      console.log(v);
+    expenseDeleted() {
       this.showExpenseEditDialog = false;
     },
     expenseWasEdited(changedExpense) {

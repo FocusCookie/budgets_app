@@ -25,16 +25,13 @@
       </div>
     </v-card>
 
-    <v-dialog v-model="showVaultEditDialog">
-      <v-card class="pa-4 rounded-xl">
-        <EditVaultDialog
-          :vault="vault"
-          @changed="closeEditVaultDialog"
-          @canceled="closeEditVaultDialog"
-          @deleted="deleteVault"
-        />
-      </v-card>
-    </v-dialog>
+    <EditVaultDialog
+      :vault="vault"
+      :display="showVaultEditDialog"
+      @changed="closeEditVaultDialog"
+      @canceled="closeEditVaultDialog"
+      @deleted="deleteVault"
+    />
   </div>
 </template>
 

@@ -200,9 +200,9 @@ const actions = {
 
       const editedExpense = await ExpensesService.api.edit(id, expense);
 
-      const editedExpenseIndex = expenses.findIndex(exp => exp._id === id);
+      const toEditExpense = expenses.find(exp => exp._id === id);
 
-      expenses[editedExpenseIndex] = editedExpense;
+      Object.assign(toEditExpense, editedExpense);
 
       ExpensesService.local.setExpensesCurrentMonth(expenses);
 

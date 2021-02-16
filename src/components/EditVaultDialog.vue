@@ -1,54 +1,61 @@
 <template>
-  <div class="wrapper">
-    <span class="text-h6 primary--text font-weight-bold text-uppercase"
-      >Edit {{ vault.name }}
-    </span>
+  <v-dialog v-model="display" style="margin:0; padding:0;">
+    <v-card class="text-left rounded-xl ma-0">
+      <v-card-title
+        class="headline white--text font-weight-bold text-h6 pa-2 text-uppercase"
+      >
+        EDIT {{ vault.name }}
+      </v-card-title>
+      <v-card-text class="px-3 pt-6 pb-0 text-overline">
+        <div v-if="deleteRequirementsMsg" class="mt-4">
+          <p class="font-weight-bold">🚨 Deleting {{ vault.name }}</p>
+          <p>
+            To delete the vault, please type in
+            <span class="font-weight-bold error--text">{{ vault.name }} </span
+            >and click delete.
+          </p>
+        </div>
 
-    <div v-if="deleteRequirementsMsg" class="mt-4">
-      <p class="font-weight-bold">🚨 Deleting {{ vault.name }}</p>
-      <p>
-        To delete the vault, please type in
-        <span class="font-weight-bold error--text">{{ vault.name }} </span>and
-        click delete.
-      </p>
-    </div>
+        <v-progress-circular
+          v-if="editingVault"
+          :size="100"
+          color="primary"
+          indeterminate
+        />
 
-    <v-progress-circular
-      v-if="editingVault"
-      :size="100"
-      color="primary"
-      indeterminate
-    />
-    <form v-if="!editingVault" class="mt-4" @keyup.enter="submit">
-      <v-text-field
-        v-model="name"
-        :error-messages="nameErrors"
-        label="Name"
-        :counter="30"
-        required
-        rounded
-        outlined
-        clearable
-        prepend-inner-icon="mdi-safe"
-        @input="$v.name.$touch()"
-        @blur="$v.name.$touch()"
-      />
+        <form v-if="!editingVault" class="pa-0" @keyup.enter="submit">
+          <v-text-field
+            v-model="name"
+            :error-messages="nameErrors"
+            label="Name"
+            class="ma-0 py-0"
+            :counter="30"
+            required
+            rounded
+            outlined
+            clearable
+            prepend-inner-icon="mdi-safe"
+            @input="$v.name.$touch()"
+            @blur="$v.name.$touch()"
+          />
+        </form>
+      </v-card-text>
 
-      <div class="buttonsWrapper">
-        <v-btn small rounded color="secondary" text @click="cancel">
+      <v-card-actions class="pa-4 d-flex justify-space-between">
+        <v-btn rounded color="primary" outlined text @click="cancel">
           Cancel
         </v-btn>
 
-        <v-btn small rounded color="error" text @click="deleteVault">
+        <v-btn rounded color="secondary" text @click="deleteVault">
           Delete
         </v-btn>
 
-        <v-btn small rounded color="primary" @click="submit">
+        <v-btn rounded color="primary" @click="submit">
           save vault
         </v-btn>
-      </div>
-    </form>
-  </div>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -60,7 +67,7 @@ import { UserService } from "@/services/user.service.js";
 export default {
   name: "EditVaultDialog",
   mixins: [validationMixin],
-  props: ["vault"],
+  props: ["vault", "display"],
   validations: {
     name: { required, minLength: minLength(3), maxLength: maxLength(30) },
   },
@@ -159,12 +166,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.buttonsWrapper {
-  display: flex;
-  justify-content: space-between;
-}
 .wrapper {
   display: flex;
   flex-direction: column;
+}
+.headline {
+  background: var(--v-primary-base);
+  display: flex;
+  justify-content: center;
+}
+.v-dialog.v-dialog--active {
+  margin: 0;
 }
 </style>

@@ -188,7 +188,7 @@
       <v-divider />
 
       <v-card-actions class="pa-4">
-        <v-btn rounded color="error" text @click="cancelCreation">
+        <v-btn rounded color="primary" outlined @click="cancelCreation">
           Cancel
         </v-btn>
 
@@ -380,7 +380,7 @@ export default {
 
         // add in the if the return of the new selling point post await
         if (!foundInputError && !foundInputErrorForNewSellingPoint) {
-          const expense = {
+          let expense = {
             sum: this.sum,
             type: this.spontaneous ? "spontaneous" : "monthly",
             sellingPoint: newSellingPointCreated
@@ -389,9 +389,12 @@ export default {
                   sp => sp.name === this.selectedSellingPoint,
                 )._id,
             vault: this.$store.getters["vault/id"],
-            recurring: this.recurring,
-            recurringLastMonth: this.recurringLastMonth,
           };
+
+          if (this.recurring) {
+            expense.recurring = this.recurring;
+            expense.recurringLastMonth = this.recurringLastMonth;
+          }
 
           this.$store.dispatch("expenses/create", expense);
 

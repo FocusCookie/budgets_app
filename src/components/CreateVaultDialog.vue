@@ -52,9 +52,8 @@
         <v-btn
           v-if="!firstVault"
           rounded
-          small
-          color="secondary"
-          text
+          color="primary"
+          outlined
           @click="cancel"
         >
           Cancel
@@ -62,7 +61,7 @@
 
         <v-spacer />
 
-        <v-btn rounded small color="primary" @click="submit">
+        <v-btn rounded color="primary" @click="submit">
           Create vault
         </v-btn>
       </v-card-actions>
