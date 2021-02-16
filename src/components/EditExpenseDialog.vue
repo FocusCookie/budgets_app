@@ -133,7 +133,12 @@
           Cancel
         </v-btn>
 
-        <v-btn rounded color="secondary" text @click="deleteExpense">
+        <v-btn
+          rounded
+          color="secondary"
+          text
+          @click="deleteDialog = !deleteDialog"
+        >
           Delete
         </v-btn>
 
@@ -142,6 +147,43 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <!-- DELETE DIALOG -->
+    <v-dialog
+      v-model="deleteDialog"
+      content-class="ma-0 px-3 rounded-0"
+      fluid
+      scrollable
+    >
+      <v-card class="text-left rounded-xl">
+        <v-card-title
+          class="deleteHeadline white--text font-weight-bold text-h6 pa-2 text-uppercase"
+        >
+          🚨 Delete {{ sellingPoint.name }}
+        </v-card-title>
+
+        <v-card-text class="pa-3 body-1 black--text">
+          Are you sure that you want to delete the expense for
+          {{ sellingPoint.name }} with {{ expense.sum }}?
+        </v-card-text>
+
+        <v-card-actions class="pa-4 d-flex justify-space-between">
+          <v-btn
+            color="error"
+            rounded
+            dark
+            :loading="deleting"
+            @click="deleteExpense"
+          >
+            Delete
+          </v-btn>
+
+          <v-btn rounded color="primary" @click="deleteDialog = !deleteDialog">
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-dialog>
 </template>
 
@@ -168,14 +210,15 @@ export default {
         required: value => !!value || "Required.",
         min: v => v.length >= 1 || "Min 1 character.",
         minSellingPointInitials: v => v.length >= 1 || "Min 1 character.",
-        maxSellingPointInitials: v => v.length <= 2 || "Max 2 characters.",
         minSellingPointName: v => v.length >= 2 || "Min 2 character.",
+        maxSellingPointInitials: v => v.length <= 2 || "Max 2 characters.",
         maxSellingPointName: v => v.length <= 50 || "Max 50 characters.",
       },
       type: "hex",
       hex: "#673AB7",
       expenseBeforeEdit: null,
       deleting: false,
+      deleteDialog: false,
       saving: false,
     };
   },
@@ -376,6 +419,12 @@ export default {
 <style scoped>
 .headline {
   background: var(--v-primary-base);
+  display: flex;
+  justify-content: center;
+}
+
+.deleteHeadline {
+  background: var(--v-error-base);
   display: flex;
   justify-content: center;
 }
