@@ -8,6 +8,7 @@ const state = {
   requestingExpensesCurrentMonth: false,
   requestingExpensesFromTo: false,
   creatingExpenseRequest: false,
+  deletingExpenseRequest: false,
   expensesError: "",
   expensesErrorStatus: 0,
 };
@@ -37,6 +38,23 @@ const mutations = {
   },
 
   editingExpenseError(state, { errorCode, errorMessage }) {
+    state.editingExpenseRequest = false;
+    state.expensesError = errorCode;
+    state.expensesErrorStatus = errorMessage;
+  },
+
+  deletingExpenseRequest(state) {
+    state.deletingExpenseRequest = true;
+    state.expensesError = "";
+    state.expensesErrorStatus = 0;
+  },
+
+  deletingExpenseSuccess(state, expenses) {
+    state.deletingExpenseRequest = false;
+    state.expensesCurrentMonth = expenses;
+  },
+
+  deletingExpenseError(state, { errorCode, errorMessage }) {
     state.editingExpenseRequest = false;
     state.expensesError = errorCode;
     state.expensesErrorStatus = errorMessage;
@@ -193,6 +211,31 @@ const actions = {
     context.commit("reset");
     ExpensesService.local.removeExpensesCurrentMonth();
     ExpensesService.local.removeExpensesFromTo();
+  },
+
+  delete: async (context, id) => {
+    try {
+      if (id) {
+        context.commit("deletingExpenseRequest");
+
+        await ExpensesService.api.delete(id);
+
+        const expenses = store.getters["expenses/currentMonth"].filter(
+          exp => exp._id !== id,
+        );
+
+        ExpensesService.local.setExpensesCurrentMonth(expenses);
+
+        context.commit("deletingExpenseSuccess", expenses);
+
+        return true;
+      } else {
+        throw { name: "Deleting Expense", message: "No ID given." };
+      }
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   },
 };
 

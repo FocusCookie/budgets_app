@@ -81,7 +81,7 @@
         :selling-point="sellingPoint"
         @saved="expenseWasEdited"
         @canceled="closeEditExpenseDialog"
-        @deleted="closeEditExpenseDialog"
+        @deleted="expenseDeleted"
       />
     </div>
   </div>
@@ -149,6 +149,10 @@ export default {
   },
   methods: {
     closeEditExpenseDialog() {
+      this.showExpenseEditDialog = false;
+    },
+    expenseDeleted(v) {
+      console.log(v);
       this.showExpenseEditDialog = false;
     },
     expenseWasEdited(changedExpense) {

@@ -96,13 +96,13 @@ export default {
         expense => expense.type === "monthly",
       );
 
-      return monthly.length > 0 ? monthly : [];
+      return monthly.length > 0 ? monthly.reverse() : [];
     },
     spontaneousExpenses() {
       const spontaneous = this.expenses.filter(
         expense => expense.type === "spontaneous",
       );
-      return spontaneous.length > 0 ? spontaneous : [];
+      return spontaneous.length > 0 ? spontaneous.reverse() : [];
     },
     mainVault() {
       return this.$store.getters["user/mainVault"];
@@ -190,9 +190,14 @@ export default {
   display: inline-block;
   margin-right: 10px;
 }
-.list-enter-active,
+.list-enter-active {
+  transition: all 1s;
+}
+
 .list-leave-active,
 .list-leave-to {
+  opacity: 0;
+  transform: translateX(-300px);
   transition: all 1s;
 }
 .list-enter  /* .list-leave-active below version 2.1.8 */ {

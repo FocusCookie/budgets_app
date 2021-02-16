@@ -128,14 +128,16 @@
 
       <v-divider />
 
-      <v-card-actions class="pa-4">
-        <v-btn small rounded color="error" text @click="cancelEdit">
+      <v-card-actions class="pa-4 d-flex justify-space-between">
+        <v-btn rounded color="primary" outlined text @click="cancelEdit">
           Cancel
         </v-btn>
 
-        <v-spacer />
+        <v-btn rounded color="secondary" text @click="deleteExpense">
+          Delete
+        </v-btn>
 
-        <v-btn small color="primary" rounded dark @click="save">
+        <v-btn color="primary" rounded dark :loading="deleting" @click="save">
           Save
         </v-btn>
       </v-card-actions>
@@ -173,6 +175,8 @@ export default {
       type: "hex",
       hex: "#673AB7",
       expenseBeforeEdit: null,
+      deleting: false,
+      saving: false,
     };
   },
   computed: {
@@ -258,6 +262,8 @@ export default {
     },
     async save() {
       try {
+        this.saving = true;
+
         let newSellingPointCreated = false;
         let foundInputError = false;
         let foundInputErrorForNewSellingPoint = false;
@@ -336,12 +342,31 @@ export default {
             this.$emit("saved", false);
           }
         }
+
+        this.saving = false;
       } catch (error) {
+        this.saving = false;
         console.log(error);
       }
     },
     cancelEdit() {
       this.$emit("canceled", true);
+    },
+    async deleteExpense() {
+      try {
+        this.deleting = true;
+
+        const expensesWithoutDeletedExpense = await this.$store.dispatch(
+          "expenses/delete",
+          this.expense._id,
+        );
+
+        this.$emit("deleted", expensesWithoutDeletedExpense);
+
+        this.deleting = false;
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 };
@@ -376,11 +401,9 @@ export default {
   width: 50%;
   transition: all 250ms ease-in-out;
 }
-
-.buttonsContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  justify-content: center;
+.buttonsWrapper {
+  display: flex;
+  justify-content: space-between;
 }
 
 .createSellingPointWrapper {
