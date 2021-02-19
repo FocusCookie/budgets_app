@@ -9,14 +9,14 @@ import vuetify from "./plugins/vuetify";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/dist/vuetify.min.css";
-import { ApiService } from "./services/api.service.js";
+//import { ApiService } from "./services/api.service.js";
 
 Vue.config.productionTip = false;
 
 Vue.use(Vuelidate);
 
 // initialize the base url
-ApiService.init("http://0.0.0.0:3000/");
+//ApiService.init("http://0.0.0.0:3000/");
 
 new Vue({
   store,
