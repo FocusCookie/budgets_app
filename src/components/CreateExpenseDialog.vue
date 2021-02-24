@@ -1,9 +1,9 @@
 <template>
   <v-dialog
     v-model="open"
-    content-class="ma-0 px-3 rounded-0"
+    content-class=""
     fluid
-    persistent
+    fullscreen
     transition="dialog-bottom-transition"
     scrollable
   >
