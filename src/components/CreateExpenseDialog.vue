@@ -9,7 +9,7 @@
   >
     <div class="wrapper pa-4">
       <!-- EXPENSE TYPE -->
-      <div class="typeContainer pa-1" @click="spontaneous = !spontaneous">
+      <div class="typeContainer" @click="spontaneous = !spontaneous">
         <div
           :class="
             `typeSlider primary text-center white--text text-button ${
@@ -91,6 +91,8 @@
       </div>
 
       <SellingPointCarousel class="my-4" />
+
+      <SumKeypad class="my-4" />
 
       <!-- SUM -->
       <v-text-field
@@ -209,10 +211,11 @@
 
 <script>
 import SellingPointCarousel from "@/components/SellingPointCarousel";
+import SumKeypad from "@/components/SumKeypad";
 
 export default {
   name: "CreateExpenseDialog",
-  components: { SellingPointCarousel },
+  components: { SellingPointCarousel, SumKeypad },
   data() {
     return {
       newSellingPointCreationText: "create new selling point",
@@ -441,6 +444,7 @@ export default {
   display: block;
   height: 40px;
   width: 100%;
+  padding: 2px;
 }
 
 .headlineCenter {
