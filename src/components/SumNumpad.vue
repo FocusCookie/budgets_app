@@ -8,54 +8,63 @@
     <div class="numpadWrapper">
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 1"
       >
         1
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 2"
       >
         2
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 3"
       >
         3
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 4"
       >
         4
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 5"
       >
         5
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 6"
       >
         6
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 7"
       >
         7
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 8"
       >
         8
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 9"
       >
         9
@@ -68,12 +77,14 @@
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="disableNumKeys"
         @click="sumtext += 0"
       >
         0
       </v-btn>
       <v-btn
         class="primary elevation-0 py-6 rounded-lg font-weight-bold text-h4"
+        :disabled="sumtext.includes('.')"
         @click="sumtext += '.'"
       >
         .
@@ -89,6 +100,11 @@ export default {
     sumtext: "",
   }),
   computed: {
+    disableNumKeys() {
+      return this.sumtext.includes(".")
+        ? this.sumtext.split(".")[1].length >= 2
+        : false;
+    },
     sum() {
       return this.sumtext !== "" ? parseFloat(this.sumtext).toFixed(2) : 0;
     },

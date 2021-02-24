@@ -92,7 +92,7 @@
 
       <SellingPointCarousel class="my-4" />
 
-      <SumKeypad class="my-4" />
+      <SumNumpad class="my-4" @input="print" />
 
       <!-- SUM -->
       <v-text-field
@@ -211,11 +211,11 @@
 
 <script>
 import SellingPointCarousel from "@/components/SellingPointCarousel";
-import SumKeypad from "@/components/SumKeypad";
+import SumNumpad from "@/components/SumNumpad";
 
 export default {
   name: "CreateExpenseDialog",
-  components: { SellingPointCarousel, SumKeypad },
+  components: { SellingPointCarousel, SumNumpad },
   data() {
     return {
       newSellingPointCreationText: "create new selling point",
@@ -417,6 +417,9 @@ export default {
     },
     cancelCreation() {
       this.$emit("cancel", false);
+    },
+    print(v) {
+      console.log(v);
     },
   },
 };
