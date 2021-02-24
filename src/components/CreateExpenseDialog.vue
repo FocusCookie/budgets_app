@@ -7,187 +7,192 @@
     transition="dialog-bottom-transition"
     scrollable
   >
-    <v-card class="text-left rounded-xl">
-      <v-card-title
-        class="headline white--text font-weight-bold text-h6 pa-2 text-uppercase"
-      >
-        Create a new Expense
-      </v-card-title>
-      <v-card-text class="py-3 px-0 text-overline">
-        <div class="px-3">
-          <div class="typeContainer pa-1 " @click="spontaneous = !spontaneous">
-            <div
-              :class="
-                `typeSlider primary text-center white--text text-button ${
-                  spontaneous ? '' : 'sliderMoveRight'
-                }`
-              "
-            >
-              {{ spontaneous ? "spontaneous" : "monthly" }}
-            </div>
-          </div>
-
-          <div
-            v-if="!spontaneous"
-            class="d-flex justify-space-between align-center mt-3"
-          >
-            <span class="pl-4">Recurring</span>
-            <v-switch v-model="recurring" hide-details class="ma-0" inset />
-          </div>
-
-          <v-row v-if="recurring" justify="center" class="pa-3 mt-1">
-            <v-dialog
-              ref="dialog"
-              v-model="recurringLastMonthmodal"
-              :return-value.sync="recurringLastMonth"
-              persistent
-              width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="recurringLastMonth"
-                  :error="recurringLastMonthError"
-                  :rules="recurring ? [rules.required] : []"
-                  dense
-                  hide-details
-                  outlined
-                  rounded
-                  label="last Month of recurring the expense"
-                  append-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                />
-              </template>
-              <v-date-picker
-                v-model="recurringLastMonth"
-                color="primary"
-                type="month"
-                :min="nextMonth"
-                scrollable
-              >
-                <v-btn
-                  color="secondary"
-                  text
-                  @click="recurringLastMonthmodal = false"
-                >
-                  Cancel
-                </v-btn>
-
-                <v-spacer />
-
-                <v-btn
-                  color="primary"
-                  rounded
-                  @click="$refs.dialog.save(recurringLastMonth)"
-                >
-                  OK
-                </v-btn>
-              </v-date-picker>
-            </v-dialog>
-          </v-row>
-
-          <v-text-field
-            small
-            class="py-4"
-            color="primary"
-            label="SUM"
-            placeholder="0.00"
-            rounded
-            outlined
-            dense
-            hide-details
-            type="number"
-            append-icon="mdi-currency-eur"
-            :error="enteredSumError"
-            :rules="[rules.required]"
-            @input="updateSum"
-          />
-
-          <v-select
-            :items="sellingPointsToSelect"
-            label="Selling Point"
-            rounded
-            outlined
-            dense
-            hide-details
-            :error="selectedSellingPointError"
-            :rules="[rules.required]"
-            @input="selectSellingPoint"
-          />
-        </div>
-
+    <div class="wrapper pa-4">
+      <!-- EXPENSE TYPE -->
+      <div class="typeContainer pa-1" @click="spontaneous = !spontaneous">
         <div
-          v-if="selectedSellingPoint === newSellingPointCreationText"
-          class="mt-3 px-4 createSellingPointWrapper primary--text text-center"
+          :class="
+            `typeSlider primary text-center white--text text-button ${
+              spontaneous ? '' : 'sliderMoveRight'
+            }`
+          "
         >
-          <span class="text-overline font-weight-bold">NEW SELLING POINT</span>
-          <v-text-field
-            v-model="enteredSellingPointName"
-            small
-            color="primary"
-            label="Name"
-            placeholder="enter a name"
-            rounded
-            hide-details
-            outlined
-            dense
-            maxlength="50"
-            :error="enteredSellingPointNameError"
-            :rules="[
-              rules.required,
-              rules.minSellingPointName,
-              rules.maxSellingPointName,
-            ]"
-            @input="enterSellingPointName"
-          />
-          <v-text-field
-            v-model="enteredSellingPointInitials"
-            small
-            class="py-3"
-            color="primary"
-            label="Initials"
-            rounded
-            hide-details
-            outlined
-            dense
-            maxlength="2"
-            :error="enteredSellingPointInitalsError"
-            :rules="[
-              rules.required,
-              rules.minSellingPointInitials,
-              rules.maxSellingPointInitials,
-            ]"
-            @input="enterSellingPointInitials"
-          />
-
-          <v-card id="customBorder" outlined class="pa-0 rounded-lg">
-            <v-color-picker
-              v-model="color"
-              class="colorPicker"
-              hide-inputs
-              width="320px"
-            />
-          </v-card>
-
-          <v-select
-            :items="sellingPointCategories"
-            label="Category"
-            class="py-3"
-            rounded
-            outlined
-            dense
-            hide-details
-            :error="selectedSellingPointCategoryError"
-            :rules="[rules.required]"
-            @input="selectSellingPointCategory"
-          />
+          {{ spontaneous ? "spontaneous" : "monthly" }}
         </div>
-      </v-card-text>
+      </div>
 
-      <v-divider />
+      <!-- RECURRING -->
+      <div
+        v-if="!spontaneous"
+        class="d-flex justify-space-between align-center my-4"
+        style="min-height:40px"
+      >
+        <div class="d-flex justify-space-between align-center">
+          <v-switch v-model="recurring" hide-details class="ma-0 pa-0" inset />
+          <span
+            class="font-weight-bold text-uppercase secondary--text text--darken-3"
+            >Recurring</span
+          >
+        </div>
 
-      <v-card-actions class="pa-4">
+        <!-- REUCCIRING MONTH PICKER -->
+        <div id="recurringWrapper">
+          <v-dialog
+            v-if="recurring"
+            ref="dialog"
+            v-model="recurringLastMonthmodal"
+            :return-value.sync="recurringLastMonth"
+            persistent
+            width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-bind="attrs"
+                :color="recurringLastMonthError ? 'error' : 'primary'"
+                class="rounded-lg elevation-0 font-weight-bold"
+                width="120px"
+                dark
+                v-on="on"
+              >
+                <span v-if="recurringLastMonth === ''">until</span>
+                {{ recurringLastMonth }}
+                <v-icon class="ml-2">
+                  mdi-calendar
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-date-picker
+              v-model="recurringLastMonth"
+              color="primary"
+              type="month"
+              :min="nextMonth"
+              scrollable
+            >
+              <v-btn
+                color="secondary"
+                text
+                @click="recurringLastMonthmodal = false"
+              >
+                Cancel
+              </v-btn>
+
+              <v-spacer />
+
+              <v-btn
+                color="primary"
+                rounded
+                @click="$refs.dialog.save(recurringLastMonth)"
+              >
+                OK
+              </v-btn>
+            </v-date-picker>
+          </v-dialog>
+        </div>
+      </div>
+
+      <SellingPointCarousel class="my-4" />
+
+      <!-- SUM -->
+      <v-text-field
+        small
+        class="py-4"
+        color="primary"
+        label="SUM"
+        placeholder="0.00"
+        rounded
+        outlined
+        dense
+        hide-details
+        type="number"
+        append-icon="mdi-currency-eur"
+        :error="enteredSumError"
+        :rules="[rules.required]"
+        @input="updateSum"
+      />
+
+      <!-- SELLING POINTS -->
+      <v-select
+        :items="sellingPointsToSelect"
+        label="Selling Point"
+        rounded
+        outlined
+        dense
+        hide-details
+        :error="selectedSellingPointError"
+        :rules="[rules.required]"
+        @input="selectSellingPoint"
+      />
+
+      <!-- NEW SELLING POINT -->
+      <div
+        v-if="selectedSellingPoint === newSellingPointCreationText"
+        class="mt-3 px-4 createSellingPointWrapper primary--text text-center"
+      >
+        <span class="text-overline font-weight-bold">NEW SELLING POINT</span>
+        <v-text-field
+          v-model="enteredSellingPointName"
+          small
+          color="primary"
+          label="Name"
+          placeholder="enter a name"
+          rounded
+          hide-details
+          outlined
+          dense
+          maxlength="50"
+          :error="enteredSellingPointNameError"
+          :rules="[
+            rules.required,
+            rules.minSellingPointName,
+            rules.maxSellingPointName,
+          ]"
+          @input="enterSellingPointName"
+        />
+        <v-text-field
+          v-model="enteredSellingPointInitials"
+          small
+          class="py-3"
+          color="primary"
+          label="Initials"
+          rounded
+          hide-details
+          outlined
+          dense
+          maxlength="2"
+          :error="enteredSellingPointInitalsError"
+          :rules="[
+            rules.required,
+            rules.minSellingPointInitials,
+            rules.maxSellingPointInitials,
+          ]"
+          @input="enterSellingPointInitials"
+        />
+
+        <v-card id="customBorder" outlined class="pa-0 rounded-lg">
+          <v-color-picker
+            v-model="color"
+            class="colorPicker"
+            hide-inputs
+            width="320px"
+          />
+        </v-card>
+
+        <v-select
+          :items="sellingPointCategories"
+          label="Category"
+          class="py-3"
+          rounded
+          outlined
+          dense
+          hide-details
+          :error="selectedSellingPointCategoryError"
+          :rules="[rules.required]"
+          @input="selectSellingPointCategory"
+        />
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="d-flex justify-space-between">
         <v-btn rounded color="primary" outlined @click="cancelCreation">
           Cancel
         </v-btn>
@@ -197,14 +202,17 @@
         <v-btn color="primary" rounded dark @click="createExpense">
           Create expense
         </v-btn>
-      </v-card-actions>
-    </v-card>
+      </div>
+    </div>
   </v-dialog>
 </template>
 
 <script>
+import SellingPointCarousel from "@/components/SellingPointCarousel";
+
 export default {
   name: "CreateExpenseDialog",
+  components: { SellingPointCarousel },
   data() {
     return {
       newSellingPointCreationText: "create new selling point",
@@ -413,6 +421,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.wrapper {
+  background: #fff;
+}
+
+#recurringWrapper {
+  width: 120px;
+}
+
 .headline {
   background: var(--v-primary-base);
   display: flex;
@@ -420,7 +436,7 @@ export default {
 }
 
 .typeContainer {
-  border: 1px solid var(--v-secondary-base);
+  border: 2px solid var(--v-primary-base);
   border-radius: 100px;
   display: block;
   height: 40px;
