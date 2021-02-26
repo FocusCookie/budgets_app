@@ -1,7 +1,6 @@
 <template>
   <v-dialog
     v-model="open"
-    content-class=""
     fluid
     fullscreen
     transition="dialog-bottom-transition"
@@ -24,11 +23,16 @@
       <!-- RECURRING -->
       <div
         v-if="!spontaneous"
-        class="d-flex justify-space-between align-center my-4"
+        class="d-flex justify-space-between align-center"
         style="min-height:40px"
       >
         <div class="d-flex justify-space-between align-center">
-          <v-switch v-model="recurring" hide-details class="ma-0 pa-0" inset />
+          <v-switch
+            v-model="recurring"
+            hide-details
+            class="ma-0 pa-0 pl-1"
+            inset
+          />
           <span
             class="font-weight-bold text-uppercase secondary--text text--darken-3"
             >Recurring</span
@@ -90,119 +94,93 @@
         </div>
       </div>
 
-      <SellingPointCarousel class="my-4" />
-
-      <SumNumpad class="my-4" @input="print" />
-
-      <!-- SUM -->
-      <v-text-field
-        small
-        class="py-4"
-        color="primary"
-        label="SUM"
-        placeholder="0.00"
-        rounded
-        outlined
-        dense
-        hide-details
-        type="number"
-        append-icon="mdi-currency-eur"
-        :error="enteredSumError"
-        :rules="[rules.required]"
-        @input="updateSum"
-      />
-
-      <!-- SELLING POINTS -->
-      <v-select
-        :items="sellingPointsToSelect"
-        label="Selling Point"
-        rounded
-        outlined
-        dense
-        hide-details
-        :error="selectedSellingPointError"
-        :rules="[rules.required]"
-        @input="selectSellingPoint"
-      />
-
-      <!-- NEW SELLING POINT -->
-      <div
-        v-if="selectedSellingPoint === newSellingPointCreationText"
-        class="mt-3 px-4 createSellingPointWrapper primary--text text-center"
-      >
-        <span class="text-overline font-weight-bold">NEW SELLING POINT</span>
-        <v-text-field
-          v-model="enteredSellingPointName"
-          small
-          color="primary"
-          label="Name"
-          placeholder="enter a name"
-          rounded
-          hide-details
-          outlined
-          dense
-          maxlength="50"
-          :error="enteredSellingPointNameError"
-          :rules="[
-            rules.required,
-            rules.minSellingPointName,
-            rules.maxSellingPointName,
-          ]"
-          @input="enterSellingPointName"
-        />
-        <v-text-field
-          v-model="enteredSellingPointInitials"
-          small
-          class="py-3"
-          color="primary"
-          label="Initials"
-          rounded
-          hide-details
-          outlined
-          dense
-          maxlength="2"
-          :error="enteredSellingPointInitalsError"
-          :rules="[
-            rules.required,
-            rules.minSellingPointInitials,
-            rules.maxSellingPointInitials,
-          ]"
-          @input="enterSellingPointInitials"
-        />
-
-        <v-card id="customBorder" outlined class="pa-0 rounded-lg">
-          <v-color-picker
-            v-model="color"
-            class="colorPicker"
-            hide-inputs
-            width="320px"
+      <div>
+        <div v-if="!createNewSellingPoint">
+          <SellingPointCarousel
+            v-if="sellingPointsExist"
+            @selected="setSellingPoint"
           />
-        </v-card>
 
-        <v-select
-          :items="sellingPointCategories"
-          label="Category"
-          class="py-3"
-          rounded
-          outlined
-          dense
-          hide-details
-          :error="selectedSellingPointCategoryError"
-          :rules="[rules.required]"
-          @input="selectSellingPointCategory"
-        />
+          <v-btn
+            v-if="sellingPointsExist && !createNewSellingPoint"
+            class="mt-2"
+            rounded
+            small
+            color="secondary lighten-1"
+            outlined
+            @click="createNewSellingPoint = true"
+          >
+            New Selling Point
+          </v-btn>
+        </div>
+
+        <div v-if="createNewSellingPoint || !sellingPointsExist">
+          <v-text-field
+            v-model="enteredSellingPointName"
+            small
+            color="primary"
+            label="Selling Point Name"
+            placeholder="enter a selling point name"
+            rounded
+            outlined
+            dense
+            counter
+            min-length="2"
+            maxlength="50"
+            :error="enteredSellingPointNameError"
+            :rules="[
+              rules.required,
+              rules.minSellingPointName,
+              rules.maxSellingPointName,
+            ]"
+            @input="enterSellingPointName"
+          />
+
+          <NativeSelect
+            :items="sellingPointCategories"
+            class="pb-2"
+            label="Category"
+            rounded
+            dense
+            outlined
+            hide-details
+            :error="selectedSellingPointCategoryError"
+            :rules="[rules.required]"
+            @input="selectSellingPointCategory"
+          />
+
+          <v-btn
+            v-if="!sellingPointsExist && createNewSellingPoint"
+            rounded
+            small
+            color="primary"
+            outlined
+            @click="createNewSellingPoint = false"
+          >
+            Cancel
+          </v-btn>
+        </div>
       </div>
+
+      <SumNumpad :error="enteredSumError" @input="updateSum" />
 
       <!-- BUTTONS -->
       <div class="d-flex justify-space-between">
-        <v-btn rounded color="primary" outlined @click="cancelCreation">
+        <v-btn rounded color="secondary" large outlined @click="cancelCreation">
           Cancel
         </v-btn>
 
         <v-spacer />
 
-        <v-btn color="primary" rounded dark @click="createExpense">
-          Create expense
+        <v-btn
+          color="success"
+          class="elevation-0"
+          rounded
+          large
+          dark
+          @click="createExpense"
+        >
+          Create
         </v-btn>
       </div>
     </div>
@@ -211,26 +189,24 @@
 
 <script>
 import SellingPointCarousel from "@/components/SellingPointCarousel";
+import NativeSelect from "@/components/NativeSelect";
 import SumNumpad from "@/components/SumNumpad";
 
 export default {
   name: "CreateExpenseDialog",
-  components: { SellingPointCarousel, SumNumpad },
+  components: { SellingPointCarousel, SumNumpad, NativeSelect },
   data() {
     return {
-      newSellingPointCreationText: "create new selling point",
+      createNewSellingPoint: false,
       open: true,
       spontaneous: true,
-      enteredSellingPointInitials: "",
       enteredSellingPointName: "",
       selectedSellingPointCategory: "",
-      sellingPointColor: "primary",
       selectedSellingPoint: "",
       enteredSumError: false,
       selectedSellingPointError: false,
       selectedSellingPointCategoryError: false,
       enteredSellingPointNameError: false,
-      enteredSellingPointInitalsError: false,
       recurringLastMonthError: false,
       sum: 0,
       recurring: false,
@@ -249,36 +225,9 @@ export default {
     };
   },
   computed: {
-    color: {
-      get() {
-        return this[this.type];
-      },
-      set(v) {
-        this[this.type] = v;
-      },
-    },
-    showColor() {
-      if (typeof this.color === "string") return this.color;
-
-      return JSON.stringify(
-        Object.keys(this.color).reduce((color, key) => {
-          color[key] = Number(this.color[key].toFixed(2));
-          return color;
-        }, {}),
-        null,
-        2,
-      );
-    },
-    sellingPointsToSelect() {
+    sellingPointsExist() {
       const sellingPoints = this.$store.getters["sellingPoints/all"];
-      if (sellingPoints.length > 0) {
-        let result = sellingPoints.map(sp => sp.name);
-
-        result.push(this.newSellingPointCreationText);
-        return result;
-      } else {
-        return [this.newSellingPointCreationText];
-      }
+      return sellingPoints.length > 0 ? true : false;
     },
     sellingPointCategories() {
       const categoriesObj = this.$store.getters["categories/all"];
@@ -289,7 +238,7 @@ export default {
         categories.push(categoriesObj[cat].title);
       }
 
-      return categories;
+      return categories.sort();
     },
     categories() {
       return this.$store.getters["categories/all"];
@@ -307,6 +256,9 @@ export default {
   },
   created() {},
   methods: {
+    setSellingPoint(sp) {
+      this.selectedSellingPoint = sp._id;
+    },
     updateSum(v) {
       this.enteredSumError = false;
       this.sum = v;
@@ -314,10 +266,6 @@ export default {
     enterSellingPointName(value) {
       this.enteredSellingPointNameError = false;
       this.enteredSellingPointName = value;
-    },
-    enterSellingPointInitials(value) {
-      this.enteredSellingPointInitalsError = false;
-      this.enteredSellingPointInitials = value;
     },
     selectSellingPointCategory(value) {
       this.selectedSellingPointCategoryError = false;
@@ -348,7 +296,7 @@ export default {
         }
 
         // only check if the user wants to create a new selling point, the last item of the sellingPointCategories is "create new selling point"
-        if (this.selectedSellingPoint === this.newSellingPointCreationText) {
+        if (!this.sellingPointsExist || this.createNewSellingPoint) {
           if (this.selectedSellingPointCategory === "") {
             this.sellingPointCategoryError = true;
             foundInputErrorForNewSellingPoint = true;
@@ -373,18 +321,16 @@ export default {
         }
 
         if (
-          !foundInputErrorForNewSellingPoint &&
-          this.selectedSellingPoint === this.newSellingPointCreationText
+          (!foundInputErrorForNewSellingPoint && !this.sellingPointsExist) ||
+          this.createNewSellingPoint
         ) {
           newSellingPointCreated = await this.$store.dispatch(
             "sellingPoints/add",
             {
               name: this.enteredSellingPointName,
-              initials: this.enteredSellingPointInitials,
               category: this.categories.find(
                 cat => cat.title === this.selectedSellingPointCategory,
               ).title,
-              color: this.hex,
             },
           );
         }
@@ -396,9 +342,7 @@ export default {
             type: this.spontaneous ? "spontaneous" : "monthly",
             sellingPoint: newSellingPointCreated
               ? newSellingPointCreated._id
-              : this.$store.getters["sellingPoints/all"].find(
-                  sp => sp.name === this.selectedSellingPoint,
-                )._id,
+              : this.selectedSellingPoint,
             vault: this.$store.getters["vault/id"],
           };
 
@@ -429,6 +373,11 @@ export default {
 <style scoped>
 .wrapper {
   background: #fff;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-auto-columns: 1fr;
+  align-content: space-between;
 }
 
 #recurringWrapper {
@@ -477,10 +426,6 @@ export default {
 
 .sliderMoveRight {
   margin-left: 50%;
-}
-
-.colorPicker {
-  width: 100%;
 }
 
 #customBorder {

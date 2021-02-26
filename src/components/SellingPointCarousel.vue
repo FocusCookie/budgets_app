@@ -1,30 +1,54 @@
 <template>
   <div class="d-flex justify-space-between align-center">
-    <v-btn color="primary elevation-0" fab dark small @click="add">
+    <v-btn color="primary elevation-0" fab dark small @click="prev">
       <v-icon>mdi-chevron-left</v-icon>
     </v-btn>
 
     <div
       class="selection mx-2 rounded-lg d-flex justify-space-between align-center text-center px-2"
+      @click="dialog = !dialog"
     >
       <transition name="slide-fade" mode="out-in">
         <v-icon :key="sellingPointIcon" color="primary">
-          {{ sellingPointIcon }}
+          {{ sellingPointsToSelect[selectIndex].category.icon }}
         </v-icon>
       </transition>
 
       <transition name="slide-fade" mode="out-in">
         <div :key="sellingPointName" style="width:100%;">
           <span class="font-weight-bold text-uppercase custom-line-height">{{
-            sellingPointName
+            sellingPointsToSelect[selectIndex].name
           }}</span>
         </div>
       </transition>
     </div>
 
-    <v-btn color="primary elevation-0" fab dark small @click="subtract">
+    <v-btn color="primary elevation-0" fab dark small @click="next">
       <v-icon>mdi-chevron-right</v-icon>
     </v-btn>
+
+    <v-dialog v-model="dialog" scrollable max-width="400px">
+      <v-card>
+        <v-list dense>
+          <v-list-item-group color="primary">
+            <v-list-item
+              v-for="(sp, i) in sellingPointsToSelect"
+              :key="i"
+              @click="selectSellingPoint(i)"
+            >
+              <v-list-item-icon>
+                <v-icon v-text="sp.category.icon" />
+              </v-list-item-icon>
+              <v-list-item-content
+                class="text-left text-button font-weight-bold"
+              >
+                <v-list-item-title v-text="sp.name" />
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -34,15 +58,76 @@ export default {
   data: () => ({
     sellingPointIcon: "mdi-at",
     sellingPointName: "name",
+    selectIndex: 0,
+    selectedSellingPointDropdown: "",
+    dialog: false,
   }),
-  methods: {
-    add() {
-      this.sellingPointName = "Ein sehr sehr langer name für Laden";
-      this.sellingPointIcon = "mdi-wifi";
+  computed: {
+    sellingPointsToSelect() {
+      const categories = this.$store.getters["categories/all"];
+      const sellingPoints = this.$store.getters["sellingPoints/all"];
+
+      if (sellingPoints.length > 0) {
+        return sellingPoints.map(sp => {
+          return {
+            name: sp.name,
+            category: {
+              name: sp.category,
+              icon: categories.find(cat => cat.title === sp.category).icon,
+            },
+          };
+        });
+      } else {
+        return [this.newSellingPointCreationText];
+      }
     },
-    subtract() {
-      this.sellingPointName = "name";
-      this.sellingPointIcon = "mdi-at";
+  },
+  created() {
+    this.$emit(
+      "selected",
+      this.$store.getters["sellingPoints/all"].find(
+        sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
+      ),
+    );
+  },
+  methods: {
+    prev() {
+      if (this.selectIndex <= 0) {
+        this.selectIndex = this.sellingPointsToSelect.length - 1;
+      } else {
+        this.selectIndex--;
+      }
+
+      this.$emit(
+        "selected",
+        this.$store.getters["sellingPoints/all"].find(
+          sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
+        ),
+      );
+    },
+    next() {
+      if (this.selectIndex >= this.sellingPointsToSelect.length - 1) {
+        this.selectIndex = 0;
+      } else {
+        this.selectIndex++;
+      }
+
+      this.$emit(
+        "selected",
+        this.$store.getters["sellingPoints/all"].find(
+          sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
+        ),
+      );
+    },
+    selectSellingPoint(index) {
+      this.selectIndex = index;
+
+      this.$emit(
+        "selected",
+        this.$store.getters["sellingPoints/all"].find(
+          sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
+        ),
+      );
     },
   },
 };

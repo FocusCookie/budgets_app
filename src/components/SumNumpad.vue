@@ -1,5 +1,7 @@
 <template>
-  <div class="wrapper rounded-lg pa-2">
+  <div
+    :class="`sumNumpadWrapper rounded-lg pa-2 ${error ? 'error-border' : ''}`"
+  >
     <div class="sumWrapper text-right mb-2">
       <span class="text-h3 font-weight-bold"
         >{{ sumtext !== "" ? sumtext : "0" }} €</span
@@ -96,6 +98,7 @@
 <script>
 export default {
   name: "SumKeypad",
+  props: ["error"],
   data: () => ({
     sumtext: "",
   }),
@@ -118,8 +121,12 @@ export default {
 };
 </script>
 <style scoped>
-.wrapper {
+.sumNumpadWrapper {
   border: 2px solid var(--v-primary-base);
+}
+
+.error-border {
+  border: 2px solid var(--v-error-base);
 }
 
 .custom-line-height {
