@@ -1,55 +1,17 @@
 <template>
   <div id="homeContainer" class="py-1">
-    <div id="expensesContainer">
-      <div :class="typeToShow !== 'monthly' ? 'slide' : 'slide toMonthly'">
-        <div
-          :class="typeToShow !== 'monthly' ? 'list px-3' : 'list px-3 fadeOut'"
-        >
-          <v-card
-            v-if="noSpontanExpenses"
-            key="noteNoSpontan"
-            class="pa-4 mt-4 rounded-lg"
-            outlined
-            rounded
-          >
-            So far no spontaneous expenses this month!
-          </v-card>
-          <transition-group name="list" tag="div">
-            >
+    <transition-group name="expenseItem" tag="div" class="pa-4 expensesWrapper">
+      >
 
-            <Expenses
-              v-for="expense in spontaneousExpenses"
-              :key="`${expense._id}-${expense.dateCreated}`"
-              :expense="expense"
-              class="list-item"
-              @edit="startEditingExpense(expense)"
-            />
-          </transition-group>
-        </div>
+      <Expenses
+        v-for="expense in expenses"
+        :key="`${expense._id}-${expense.dateCreated}`"
+        :expense="expense"
+        class="list-item"
+        @edit="startEditingExpense(expense)"
+      />
+    </transition-group>
 
-        <div class="list px-3">
-          <transition-group name="list" tag="div">
-            >
-            <v-card
-              v-if="monthlyExpenses.length === 0"
-              key="noteNoMonthly"
-              class="pa-4 mt-4 rounded-lg"
-              outlined
-              rounded
-            >
-              So far no monthly expenses this month!
-            </v-card>
-            <Expenses
-              v-for="expense in monthlyExpenses"
-              :key="`${expense._id}-${expense.dateCreated}`"
-              :expense="expense"
-              class="list-item"
-              @edit="startEditingExpense(expense)"
-            />
-          </transition-group>
-        </div>
-      </div>
-    </div>
     <div id="expensesMenuBarContainer">
       <ExpensesMenuBar
         @typeChange="toggleExpensesTypeToShow"
@@ -89,7 +51,9 @@ export default {
   },
   computed: {
     expenses() {
-      return this.$store.getters["expenses/currentMonth"];
+      return this.$store.getters["expenses/currentMonth"]
+        .filter(exp => exp.type === this.typeToShow)
+        .reverse();
     },
     monthlyExpenses() {
       const monthly = this.expenses.filter(
@@ -155,25 +119,16 @@ export default {
   width: 100%;
 }
 
-#expensesContainer {
+.expensesWrapper {
   height: 100%;
   overflow-x: hidden;
   margin-bottom: 95px;
   width: 100%;
-}
 
-.slide {
-  width: 200%;
-  -webkit-transition: all 300ms ease-in-out;
-  -moz-transition: all 300ms ease-in-out;
-  -o-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
-}
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 16px;
 
-.list {
-  width: 50%;
-  float: left;
-  opacity: 100;
   -webkit-transition: all 300ms ease-in-out;
   -moz-transition: all 300ms ease-in-out;
   -o-transition: all 300ms ease-in-out;
@@ -188,21 +143,19 @@ export default {
   transform: translateX(-50%);
 }
 
-.list-item {
+.expenseItem-item {
   display: inline-block;
-  margin-right: 10px;
 }
-.list-enter-active {
-  transition: all 1s;
+.expenseItem-enter-active {
+  transition: all 0.3s;
 }
 
-.list-leave-active,
-.list-leave-to {
+.expenseItem-leave-active,
+.expenseItem-leave-to {
   opacity: 0;
-  transform: translateX(-300px);
-  transition: all 1s;
+  transition: all 0.01s;
 }
-.list-enter  /* .list-leave-active below version 2.1.8 */ {
+.expenseItem-enter {
   opacity: 0;
   transform: translateX(300px);
 }

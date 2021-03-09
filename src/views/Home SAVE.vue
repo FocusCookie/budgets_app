@@ -1,31 +1,47 @@
 <template>
   <div id="homeContainer" class="py-1">
-    <h1 v-if="newUser">
-      Welcome 👋
-    </h1>
-
     <div id="expensesContainer">
       <div :class="typeToShow !== 'monthly' ? 'slide' : 'slide toMonthly'">
         <div
           :class="typeToShow !== 'monthly' ? 'list px-3' : 'list px-3 fadeOut'"
         >
+          <v-card
+            v-if="noSpontanExpenses"
+            key="noteNoSpontan"
+            class="pa-4 mt-4 rounded-lg"
+            outlined
+            rounded
+          >
+            So far no spontaneous expenses this month!
+          </v-card>
           <transition-group name="list" tag="div">
             >
+
             <Expenses
               v-for="expense in spontaneousExpenses"
-              :key="`${expense.name}-${expense.dateCreated}`"
+              :key="`${expense._id}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
               @edit="startEditingExpense(expense)"
             />
           </transition-group>
         </div>
+
         <div class="list px-3">
           <transition-group name="list" tag="div">
             >
+            <v-card
+              v-if="monthlyExpenses.length === 0"
+              key="noteNoMonthly"
+              class="pa-4 mt-4 rounded-lg"
+              outlined
+              rounded
+            >
+              So far no monthly expenses this month!
+            </v-card>
             <Expenses
               v-for="expense in monthlyExpenses"
-              :key="`${expense.name}-${expense.dateCreated}`"
+              :key="`${expense._id}-${expense.dateCreated}`"
               :expense="expense"
               class="list-item"
               @edit="startEditingExpense(expense)"
@@ -43,8 +59,7 @@
 
     <CreateExpenseDialog
       v-if="createDialog"
-      :selling-points="sellingPoints"
-      :selling-point-categories="sellingPointCategories"
+      @created="expenseSuccessfullyCreated"
       @cancel="cancelCreatingExpense"
     />
   </div>
@@ -68,132 +83,58 @@ export default {
       createDialog: false,
       editDialog: false,
       typeToShow: "spontaneous",
-      expenses: null,
-      devExpenses: [
-        {
-          dateCreated: "20:01:52",
-          sum: 24.65,
-          type: "spontaneous",
-          sellingPoint: {
-            name: "DEV Alnatura",
-            initials: "AN",
-            icon: "🛒",
-            category: "food groceries",
-            color: "primary",
-          },
-        },
-        {
-          dateCreated: "20:33:50",
-          sum: 14.99,
-          type: "monthly",
-          sellingPoint: {
-            name: "DEV Netflix",
-            initials: "NF",
-            icon: "📽",
-            category: "movie streaming",
-            color: "secondary",
-          },
-        },
-        {
-          dateCreated: "20:34:52",
-          sum: 11.44,
-          type: "spontaneous",
-          sellingPoint: {
-            name: "DEV REWE",
-            initials: "RW",
-            icon: "🛒",
-            category: "food groceries",
-            color: "success",
-          },
-        },
-        {
-          dateCreated: "20:53:52",
-          sum: 14.99,
-          type: "monthly",
-          sellingPoint: {
-            name: "DEV Amazon Prime",
-            initials: "AM",
-            icon: "📽",
-            category: "movie streaming",
-            color: "error",
-          },
-        },
-      ],
       toggleNew: true,
-      sellingPoints: [
-        //TODO: needs to be fetched via api
-        "Rewe",
-        "Lidl",
-        "Edeka",
-        "Amazon",
-        "OBI",
-        "Starbucks",
-        "Dönerladen",
-        "Lieferando",
-      ],
-      sellingPointCategories: ["Food", "Drinks", "Streaming"], //TODO:  needs be fetched via api
       selectedExpenseToEdit: null,
     };
   },
   computed: {
+    expenses() {
+      return this.$store.getters["expenses/currentMonth"];
+    },
     monthlyExpenses() {
-      return this.expenses.filter(expense => expense.type === "monthly");
+      const monthly = this.expenses.filter(
+        expense => expense.type === "monthly",
+      );
+
+      return monthly.length > 0 ? monthly.reverse() : [];
     },
     spontaneousExpenses() {
-      return this.expenses.filter(expense => expense.type === "spontaneous");
-    },
-    newUser() {
-      return this.$store.getters["user/firstTimeLoggedIn"];
+      const spontaneous = this.expenses.filter(
+        expense => expense.type === "spontaneous",
+      );
+      return spontaneous.length > 0 ? spontaneous.reverse() : [];
     },
     mainVault() {
       return this.$store.getters["user/mainVault"];
     },
+    noSpontanExpenses() {
+      return this.spontaneousExpenses.length === 0 || !this.spontaneousExpenses;
+    },
   },
-  created() {
-    // only for dev, delete after dev
-    if (!this.expenses) this.expenses = this.devExpenses;
-
-    this.nextNum = this.expenses.length;
+  async created() {
+    await this.$store.dispatch("expenses/currentMonth"); // TODO: Remove when webstream function is build in, should only be releaded if
   },
   methods: {
+    expenseSuccessfullyCreated() {
+      this.createDialog = false;
+    },
     toggleExpensesTypeToShow(type) {
       if (this.typeToShow !== type) this.typeToShow = type;
     },
     startCreation() {
       this.createDialog = true;
     },
-    pushExpense() {
-      this.createDialog = true;
-
-      this.expenses.unshift({
-        dateCreated: new Date(),
-        sum: 24 + Math.random(),
-        type: this.toggleNew ? "monthly" : "spontaneous",
-        sellingPoint: {
-          name: "DEV NEW",
-          initials: "NW",
-          icon: "🛒",
-          category: "food groceries",
-          color: "primary",
-        },
-      });
-      this.toggleNew = !this.toggleNew;
-    },
-    createdExpense(v) {
+    createdExpense() {
       this.createDialog = false;
-      console.log("CREATED ", v);
     },
     cancelCreatingExpense() {
       this.createDialog = false;
-      console.log("CANCELED CRATE EXPENSE");
     },
-    editedExpense(v) {
+    editedExpense() {
       this.editDialog = false;
-      console.log("EDITED ", v);
     },
     cancelEditingExpense() {
       this.editDialog = false;
-      console.log("CANCELED EDIT EXPENSE");
     },
     startEditingExpense(expense) {
       this.editDialog = true;
@@ -251,9 +192,14 @@ export default {
   display: inline-block;
   margin-right: 10px;
 }
-.list-enter-active,
+.list-enter-active {
+  transition: all 1s;
+}
+
 .list-leave-active,
 .list-leave-to {
+  opacity: 0;
+  transform: translateX(-300px);
   transition: all 1s;
 }
 .list-enter  /* .list-leave-active below version 2.1.8 */ {

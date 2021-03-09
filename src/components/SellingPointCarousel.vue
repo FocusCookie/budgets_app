@@ -89,6 +89,8 @@ export default {
         sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
       ),
     );
+
+    console.log(this.sellingPointsToSelect);
   },
   methods: {
     prev() {

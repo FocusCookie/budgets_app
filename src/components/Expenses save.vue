@@ -1,67 +1,89 @@
 <template>
   <div class="expenseWrapper">
-    <v-card class="rounded-lg px-1">
-      <div v-if="!showMenu" class="expenseCard" @click="showMenu = !showMenu">
-        <v-icon color="primary">
-          {{ categories.find(cat => cat.title === sellingPoint.category).icon }}
+    <span class="secondary--text font-weight-bold text--lighten-2 caption"
+      >{{ dateCreated }}
+    </span>
+    <div
+      id="expensesContainer"
+      :class="`pa-3 my-2 mt-1 ${expand ? 'expanded' : 'minified'}`"
+    >
+      <v-card
+        class="sellingPointInitials"
+        elevation="0"
+        :color="`${sellingPoint.color}`"
+      >
+        <span class="text-uppercase white--text font-weight-black">{{
+          sellingPoint.initials
+        }}</span>
+      </v-card>
+
+      <div class="sellingPointIcon">
+        <v-icon>
+          {{ icon }}
         </v-icon>
-        <div class="nameAndCat">
-          <span class="text-overline font-wight-bold">{{
-            sellingPoint.name
-          }}</span>
+      </div>
 
-          <span
-            class="text-overline secondary--text text--lighten-2 font-wight-bold"
-            >{{ sellingPoint.category }}</span
-          >
-        </div>
-        <div class="text-right">
-          <span class="text-h4 secondary--text text--darken-4 font-weight-bold"
-            >{{
-              expenseToDisplay.sum >= 100
-                ? expenseToDisplay.sum.toFixed(0)
-                : expenseToDisplay.sum.toFixed(2)
-            }}
-            €</span
-          >
-        </div>
-        <span class="text-overline secondary--text text--lighten-2 ">
-          {{ dateCreated }}
+      <div v-if="expand" class="sellingPointCategoryAndName text-left">
+        <span
+          class="sellingPointCategory text-overline pa-0 mb-0  font-weight-bold secondary--text text--lighten-2"
+          >{{ sellingPoint.category }}
         </span>
+        <p
+          class="sellingPointName text-body-4 text-uppercase font-weight-bold pa-0 ma-0"
+        >
+          {{ sellingPoint.name }}
+        </p>
       </div>
 
-      <div v-if="showMenu" class="menuWrapper pa-4">
+      <div
+        :class="
+          `expenseSum font-weight-bold  pink--text text--lighten-1 ${
+            expand ? 'text-center text-h2' : 'text-right text-h4'
+          }`
+        "
+      >
+        {{ parseFloat(expenseToDisplay.sum).toFixed(2) }} €
+      </div>
+
+      <div class="moreBtn text-center">
         <v-btn
-          class="elevation-0"
-          color="primary"
           outlined
+          dark
           fab
-          @click="showExpenseEditDialog = true"
+          x-small
+          color="secondary lighten-1"
+          @click="expand = !expand"
         >
-          <v-icon>mdi-pen</v-icon>
-        </v-btn>
-        <v-btn
-          class="elevation-0"
-          color="primary"
-          fab
-          @click="showMenu = !showMenu"
-        >
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-btn class="elevation-0" color="error" outlined fab>
-          <v-icon>mdi-delete</v-icon>
+          <v-icon small color="primary">
+            {{ expand ? "mdi-close" : "mdi-dots-horizontal" }}
+          </v-icon>
         </v-btn>
       </div>
-    </v-card>
 
-    <EditExpenseDialog
-      :display="showExpenseEditDialog"
-      :expense="expenseToDisplay"
-      :selling-point="sellingPoint"
-      @saved="expenseWasEdited"
-      @canceled="closeEditExpenseDialog"
-      @deleted="expenseDeleted"
-    />
+      <div v-if="expand" class="editBtn text-center">
+        <v-btn
+          outlined
+          dark
+          fab
+          x-small
+          color="secondary lighten-1"
+          @click="showExpenseEditDialog = !showExpenseEditDialog"
+        >
+          <v-icon small color="primary">
+            mdi-pen
+          </v-icon>
+        </v-btn>
+      </div>
+
+      <EditExpenseDialog
+        :display="showExpenseEditDialog"
+        :expense="expenseToDisplay"
+        :selling-point="sellingPoint"
+        @saved="expenseWasEdited"
+        @canceled="closeEditExpenseDialog"
+        @deleted="expenseDeleted"
+      />
+    </div>
   </div>
 </template>
 
@@ -78,13 +100,12 @@ export default {
       showExpenseEditDialog: false,
       expenseToDisplay: {},
       expand: false,
-      showMenu: false,
     };
   },
   computed: {
     sellingPoint() {
       const sellingPoints = this.$store.getters["sellingPoints/all"];
-      let sellingPoint = sellingPoints.find(
+      const sellingPoint = sellingPoints.find(
         sp => sp._id === this.expenseToDisplay.sellingPoint,
       );
 
@@ -93,6 +114,8 @@ export default {
         : {
             name: "",
             category: "",
+            color: "",
+            initials: "",
             owner: "",
             icon: "",
             _id: "",
@@ -101,7 +124,7 @@ export default {
 
     dateCreated() {
       return moment(this.expenseToDisplay.dateCreated).format(
-        "DD. MMM - HH:mm",
+        "DD. MMM - hh:mm",
       );
     },
 
@@ -148,31 +171,7 @@ export default {
 }
 
 .expenseWrapper {
-  height: 1fr;
-  width: 1fr;
-}
-
-.menuWrapper {
-  height: 229px;
-  width: 1fr;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.expenseCard {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 34px 112px 51px 32px;
-  align-items: center;
-}
-
-.nameAndCat {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-content: flex-start;
+  width: 100%;
 }
 
 #expensesContainer {

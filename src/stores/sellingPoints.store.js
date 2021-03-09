@@ -72,7 +72,7 @@ const actions = {
       const uniqueUserSP =
         vaultSellingPoints.length > 0
           ? userSellingPoints.filter(usp => {
-              return vaultSellingPoints.some(vsp => usp.name !== vsp.name);
+              return vaultSellingPoints.includes(vsp => usp.name !== vsp.name);
             })
           : userSellingPoints;
 
