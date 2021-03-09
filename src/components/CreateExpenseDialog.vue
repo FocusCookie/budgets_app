@@ -197,8 +197,8 @@ export default {
   components: { SellingPointCarousel, SumNumpad, NativeSelect },
   data() {
     return {
-      createNewSellingPoint: false,
       open: true,
+      createNewSellingPoint: false,
       spontaneous: true,
       enteredSellingPointName: "",
       selectedSellingPointCategory: "",
@@ -220,8 +220,6 @@ export default {
         minSellingPointName: v => v.length >= 2 || "Min 2 character.",
         maxSellingPointName: v => v.length <= 50 || "Max 50 characters.",
       },
-      type: "hex",
-      hex: "#673AB7",
     };
   },
   computed: {
@@ -254,7 +252,9 @@ export default {
       v !== "" ? (this.recurringLastMonthError = false) : false;
     },
   },
-  created() {},
+  created() {
+    if (!this.sellingPointsExist) this.createNewSellingPoint = true;
+  },
   methods: {
     setSellingPoint(sp) {
       this.selectedSellingPoint = sp._id;
@@ -290,12 +290,12 @@ export default {
           this.enteredSumError = true;
           foundInputError = true;
         }
-        if (this.selectedSellingPoint === "") {
+        if (this.selectedSellingPoint === "" && !this.createNewSellingPoint) {
           this.selectedSellingPointError = true;
           foundInputError = true;
         }
 
-        // only check if the user wants to create a new selling point, the last item of the sellingPointCategories is "create new selling point"
+        // only check if the user wants to create a new selling point
         if (!this.sellingPointsExist || this.createNewSellingPoint) {
           if (this.selectedSellingPointCategory === "") {
             this.sellingPointCategoryError = true;
@@ -303,10 +303,6 @@ export default {
           }
           if (this.enteredSellingPointName === "") {
             this.enteredSellingPointNameError = true;
-            foundInputErrorForNewSellingPoint = true;
-          }
-          if (this.enteredSellingPointInitials === "") {
-            this.enteredSellingPointInitalsError = true;
             foundInputErrorForNewSellingPoint = true;
           }
           if (this.selectedSellingPointCategory === "") {
@@ -321,7 +317,9 @@ export default {
         }
 
         if (
-          (!foundInputErrorForNewSellingPoint && !this.sellingPointsExist) ||
+          (!foundInputErrorForNewSellingPoint &&
+            !this.sellingPointsExist &&
+            this.sum !== 0) ||
           this.createNewSellingPoint
         ) {
           newSellingPointCreated = await this.$store.dispatch(
@@ -334,6 +332,12 @@ export default {
             },
           );
         }
+
+        console.log("foundInputError", foundInputError);
+        console.log(
+          "foundInputErrorForNewSellingPoint",
+          foundInputErrorForNewSellingPoint,
+        );
 
         // add in the if the return of the new selling point post await
         if (!foundInputError && !foundInputErrorForNewSellingPoint) {

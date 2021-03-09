@@ -1,5 +1,10 @@
 <template>
-  <div id="homeContainer" class="py-1">
+  <div id="homeContainer" class="pt-1">
+    <v-card v-if="expenses.length <= 0" outlined class="ma-4 pa-2 rounded-lg">
+      No {{ this.typeToShow }} expense found within this month 😢. Please create
+      a expense.
+    </v-card>
+
     <transition-group name="expenseItem" tag="div" class="pa-4 expensesWrapper">
       >
 
@@ -80,6 +85,7 @@ export default {
   },
   methods: {
     expenseSuccessfullyCreated() {
+      console.log("CREATED EXPENSE");
       this.createDialog = false;
     },
     toggleExpensesTypeToShow(type) {
