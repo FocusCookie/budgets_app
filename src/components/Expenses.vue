@@ -48,7 +48,13 @@
         >
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-btn class="elevation-0" color="error" outlined fab>
+        <v-btn
+          class="elevation-0"
+          color="error"
+          outlined
+          fab
+          @click="showDeleteDialog = true"
+        >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </div>
@@ -62,16 +68,24 @@
       @canceled="closeEditExpenseDialog"
       @deleted="expenseDeleted"
     />
+
+    <DeleteExpense
+      v-if="showDeleteDialog"
+      :expense="expenseToDisplay"
+      @canceled="showDeleteDialog = false"
+      @deleted="showDeleteDialog = false"
+    />
   </div>
 </template>
 
 <script>
 import EditExpenseDialog from "@/components/EditExpenseDialog.vue";
+import DeleteExpense from "@/components/DeleteExpense.vue";
 import moment from "moment";
 
 export default {
   name: "Expenses",
-  components: { EditExpenseDialog },
+  components: { EditExpenseDialog, DeleteExpense },
   props: ["expense"],
   data() {
     return {
@@ -79,6 +93,7 @@ export default {
       expenseToDisplay: {},
       expand: false,
       showMenu: false,
+      showDeleteDialog: false,
     };
   },
   computed: {
@@ -125,6 +140,9 @@ export default {
     this.expenseToDisplay = this.expense;
   },
   methods: {
+    handleExpenseDeletion(e) {
+      console.log(e);
+    },
     closeEditExpenseDialog() {
       this.showExpenseEditDialog = false;
     },

@@ -26,10 +26,10 @@
     </v-card>
 
     <EditVaultDialog
+      v-if="showVaultEditDialog"
       :vault="vault"
-      :display="showVaultEditDialog"
-      @changed="closeEditVaultDialog"
-      @canceled="closeEditVaultDialog"
+      @changed="showVaultEditDialog = false"
+      @canceled="showVaultEditDialog = false"
       @deleted="deleteVault"
     />
   </div>
@@ -80,9 +80,6 @@ export default {
           this.showVaultEditDialog = true;
         }
       }
-    },
-    closeEditVaultDialog() {
-      this.showVaultEditDialog = false;
     },
     async deleteVault() {
       // check if there is another vault to set as main vault, if not set firstTime user

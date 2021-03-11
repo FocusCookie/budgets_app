@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="display" style="margin:0; padding:0;">
-    <v-card class="text-left rounded-xl ma-0">
+    <v-card v-click-outside="cancel" class="text-left rounded-xl ma-0">
       <v-card-title
         class="headline white--text font-weight-bold text-h6 pa-2 text-uppercase"
       >
@@ -67,12 +67,13 @@ import { UserService } from "@/services/user.service.js";
 export default {
   name: "EditVaultDialog",
   mixins: [validationMixin],
-  props: ["vault", "display"],
+  props: ["vault"],
   validations: {
     name: { required, minLength: minLength(3), maxLength: maxLength(30) },
   },
   data() {
     return {
+      display: true,
       name: "",
       editingVault: false,
       deleteRequirementsMsg: false,
@@ -90,13 +91,15 @@ export default {
       return errors;
     },
   },
-  created() {},
+  created() {
+    this.name = this.vault.name;
+  },
   methods: {
     async submit() {
       try {
         this.$v.$touch();
 
-        if (this.nameErrors.length === 0 && this.name.length >= 3) {
+        if (this.nameErrors.length === 0 && this.name !== this.vault.name) {
           this.editingVault = true;
 
           const editedVault = await VaultService.api.edit(
@@ -110,6 +113,8 @@ export default {
 
           this.editingVault = false;
           this.$emit("changed", true);
+        } else {
+          this.$emit("changed", "Name was not changed no API Call");
         }
       } catch (err) {
         console.log(err);
