@@ -8,21 +8,24 @@
   >
     <div class="wrapper pa-4">
       <!-- EXPENSE TYPE -->
-      <div class="typeContainer" @click="spontaneous = !spontaneous">
+      <div
+        class="typeContainer"
+        @click="spontaneousIsSelected = !spontaneousIsSelected"
+      >
         <div
           :class="
             `typeSlider primary text-center white--text text-button ${
-              spontaneous ? '' : 'sliderMoveRight'
+              spontaneousIsSelected ? '' : 'sliderMoveRight'
             }`
           "
         >
-          {{ spontaneous ? "spontaneous" : "monthly" }}
+          {{ spontaneousIsSelected ? "spontaneous" : "monthly" }}
         </div>
       </div>
 
       <!-- RECURRING -->
       <div
-        v-if="!spontaneous"
+        v-if="!spontaneousIsSelected && !edit"
         class="d-flex justify-space-between align-center"
         style="min-height:40px"
       >
@@ -94,15 +97,18 @@
         </div>
       </div>
 
+      <!-- Selling Point -->
       <div>
+        <!-- Existing Selling Point -->
         <div v-if="!createNewSellingPoint">
           <SellingPointCarousel
-            v-if="sellingPointsExist"
+            v-if="sellingPointsToSelectFrom"
+            :init="edit ? expenseToEdit.sellingPoint : null"
             @selected="setSellingPoint"
           />
 
           <v-btn
-            v-if="sellingPointsExist && !createNewSellingPoint"
+            v-if="sellingPointsToSelectFrom && !createNewSellingPoint"
             class="mt-2"
             rounded
             small
@@ -114,7 +120,8 @@
           </v-btn>
         </div>
 
-        <div v-if="createNewSellingPoint || !sellingPointsExist">
+        <!-- Create new selling point -->
+        <div v-if="createNewSellingPoint || !sellingPointsToSelectFrom">
           <v-text-field
             v-model="enteredSellingPointName"
             small
@@ -150,7 +157,7 @@
           />
 
           <v-btn
-            v-if="!sellingPointsExist && createNewSellingPoint"
+            v-if="sellingPointsToSelectFrom"
             rounded
             small
             color="primary"
@@ -162,7 +169,11 @@
         </div>
       </div>
 
-      <SumNumpad :error="enteredSumError" @input="updateSum" />
+      <SumNumpad
+        :error="enteredSumError"
+        :init="edit ? expenseToEdit.sum : 0"
+        @input="updateSum"
+      />
 
       <!-- BUTTONS -->
       <div class="d-flex justify-space-between">
@@ -178,9 +189,9 @@
           rounded
           large
           dark
-          @click="createExpense"
+          @click="storeExpense"
         >
-          Create
+          {{ edit ? "Save" : "Create" }}
         </v-btn>
       </div>
     </div>
@@ -195,11 +206,20 @@ import SumNumpad from "@/components/SumNumpad";
 export default {
   name: "CreateExpenseDialog",
   components: { SellingPointCarousel, SumNumpad, NativeSelect },
+  props: {
+    edit: {
+      type: Boolean,
+      default: false,
+    },
+    expenseToEdit: {
+      type: Object,
+    },
+  },
   data() {
     return {
       open: true,
       createNewSellingPoint: false,
-      spontaneous: true,
+      spontaneousIsSelected: true,
       enteredSellingPointName: "",
       selectedSellingPointCategory: "",
       selectedSellingPoint: "",
@@ -220,10 +240,11 @@ export default {
         minSellingPointName: v => v.length >= 2 || "Min 2 character.",
         maxSellingPointName: v => v.length <= 50 || "Max 50 characters.",
       },
+      expenseBeforeEdit: null,
     };
   },
   computed: {
-    sellingPointsExist() {
+    sellingPointsToSelectFrom() {
       const sellingPoints = this.$store.getters["sellingPoints/all"];
       return sellingPoints.length > 0 ? true : false;
     },
@@ -253,7 +274,14 @@ export default {
     },
   },
   created() {
-    if (!this.sellingPointsExist) this.createNewSellingPoint = true;
+    if (!this.sellingPointsToSelectFrom) this.createNewSellingPoint = true;
+
+    if (this.edit) {
+      this.selectedSellingPoint = this.expenseToEdit.sellingPoint;
+      this.sum = this.expenseToEdit.sum;
+      this.spontaneousIsSelected =
+        this.expenseToEdit.type === "spontaneous" ? true : false;
+    }
   },
   methods: {
     setSellingPoint(sp) {
@@ -279,7 +307,7 @@ export default {
       this.selectedSellingPointCategoryError = false;
       this.selectedSellingPointCategory = value;
     },
-    async createExpense() {
+    async storeExpense() {
       try {
         let newSellingPointCreated = false;
         let foundInputError = false;
@@ -296,7 +324,7 @@ export default {
         }
 
         // only check if the user wants to create a new selling point
-        if (!this.sellingPointsExist || this.createNewSellingPoint) {
+        if (!this.sellingPointsToSelectFrom || this.createNewSellingPoint) {
           if (this.selectedSellingPointCategory === "") {
             this.sellingPointCategoryError = true;
             foundInputErrorForNewSellingPoint = true;
@@ -318,7 +346,7 @@ export default {
 
         if (
           (!foundInputErrorForNewSellingPoint &&
-            !this.sellingPointsExist &&
+            !this.sellingPointsToSelectFrom &&
             this.sum !== 0) ||
           this.createNewSellingPoint
         ) {
@@ -333,17 +361,15 @@ export default {
           );
         }
 
-        console.log("foundInputError", foundInputError);
-        console.log(
-          "foundInputErrorForNewSellingPoint",
-          foundInputErrorForNewSellingPoint,
-        );
-
-        // add in the if the return of the new selling point post await
-        if (!foundInputError && !foundInputErrorForNewSellingPoint) {
-          let expense = {
+        // CREATE NEW EXPENSE
+        if (
+          !foundInputError &&
+          !foundInputErrorForNewSellingPoint &&
+          !this.edit
+        ) {
+          let newExpense = {
             sum: this.sum,
-            type: this.spontaneous ? "spontaneous" : "monthly",
+            type: this.spontaneousIsSelected ? "spontaneous" : "monthly",
             sellingPoint: newSellingPointCreated
               ? newSellingPointCreated._id
               : this.selectedSellingPoint,
@@ -351,13 +377,42 @@ export default {
           };
 
           if (this.recurring) {
-            expense.recurring = this.recurring;
-            expense.recurringLastMonth = this.recurringLastMonth;
+            newExpense.recurring = this.recurring;
+            newExpense.recurringLastMonth = this.recurringLastMonth;
           }
 
-          this.$store.dispatch("expenses/create", expense);
+          this.$store.dispatch("expenses/create", newExpense);
 
           this.$emit("created", true);
+        }
+
+        // EDIT EXISITNG EXPENSE
+        // add in the if the return of the new selling point post await
+        if (
+          this.edit &&
+          !foundInputError &&
+          !foundInputErrorForNewSellingPoint
+        ) {
+          if (
+            this.expenseToEdit.sum !== this.sum ||
+            this.expenseToEdit.type !== this.type ||
+            this.expenseToEdit.sellingPoint !== this.sellingPoint
+          ) {
+            const updatedExpense = {
+              _id: this.expenseToEdit._id,
+              sum: this.sum,
+              type: this.spontaneousIsSelected ? "spontaneous" : "monthly",
+              sellingPoint: newSellingPointCreated
+                ? newSellingPointCreated._id
+                : this.selectedSellingPoint,
+            };
+
+            await this.$store.dispatch("expenses/edit", updatedExpense);
+
+            this.$emit("updated", updatedExpense);
+          } else {
+            this.$emit("updated", false);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -365,9 +420,6 @@ export default {
     },
     cancelCreation() {
       this.$emit("cancel", false);
-    },
-    print(v) {
-      console.log(v);
     },
   },
 };

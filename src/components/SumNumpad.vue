@@ -98,7 +98,16 @@
 <script>
 export default {
   name: "SumKeypad",
-  props: ["error"],
+  props: {
+    error: {
+      type: Boolean,
+      default: false,
+    },
+    init: {
+      type: Number,
+      default: 0,
+    },
+  },
   data: () => ({
     sumtext: "",
   }),
@@ -116,6 +125,9 @@ export default {
     sum(value) {
       this.$emit("input", value);
     },
+  },
+  created() {
+    if (this.init) this.sumtext = this.init.toString();
   },
   methods: {},
 };

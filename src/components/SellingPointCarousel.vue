@@ -55,11 +55,15 @@
 <script>
 export default {
   name: "SellingPointCarousel",
+  props: {
+    init: {
+      type: String,
+    },
+  },
   data: () => ({
     sellingPointIcon: "mdi-at",
     sellingPointName: "name",
     selectIndex: 0,
-    selectedSellingPointDropdown: "",
     dialog: false,
   }),
   computed: {
@@ -83,14 +87,25 @@ export default {
     },
   },
   created() {
+    const sellingPoints = this.$store.getters["sellingPoints/all"];
+    const initializedSellingPoint = sellingPoints.find(
+      sp => sp._id === this.init,
+    );
+
+    if (this.init) {
+      this.selectIndex = this.sellingPointsToSelect.findIndex(
+        el => el.name === initializedSellingPoint.name,
+      );
+
+      this.sellingPointName = initializedSellingPoint.name;
+    }
+
     this.$emit(
       "selected",
       this.$store.getters["sellingPoints/all"].find(
         sp => sp.name === this.sellingPointsToSelect[this.selectIndex].name,
       ),
     );
-
-    console.log(this.sellingPointsToSelect);
   },
   methods: {
     prev() {

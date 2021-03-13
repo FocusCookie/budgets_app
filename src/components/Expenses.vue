@@ -36,7 +36,7 @@
           color="primary"
           outlined
           fab
-          @click="showExpenseEditDialog = true"
+          @click="editExpense"
         >
           <v-icon>mdi-pen</v-icon>
         </v-btn>
@@ -60,15 +60,6 @@
       </div>
     </v-card>
 
-    <EditExpenseDialog
-      :display="showExpenseEditDialog"
-      :expense="expenseToDisplay"
-      :selling-point="sellingPoint"
-      @saved="expenseWasEdited"
-      @canceled="closeEditExpenseDialog"
-      @deleted="expenseDeleted"
-    />
-
     <DeleteExpense
       v-if="showDeleteDialog"
       :expense="expenseToDisplay"
@@ -79,17 +70,20 @@
 </template>
 
 <script>
-import EditExpenseDialog from "@/components/EditExpenseDialog.vue";
 import DeleteExpense from "@/components/DeleteExpense.vue";
 import moment from "moment";
 
 export default {
   name: "Expenses",
-  components: { EditExpenseDialog, DeleteExpense },
-  props: ["expense"],
+  components: { DeleteExpense },
+  props: {
+    expense: {
+      type: Object,
+      require: true,
+    },
+  },
   data() {
     return {
-      showExpenseEditDialog: false,
       expenseToDisplay: {},
       expand: false,
       showMenu: false,
@@ -136,6 +130,15 @@ export default {
       }
     },
   },
+  watch: {
+    expense: {
+      deep: true,
+      immediate: true,
+      handler(update) {
+        this.expenseToDisplay = Object.assign({}, update);
+      },
+    },
+  },
   created() {
     this.expenseToDisplay = this.expense;
   },
@@ -143,16 +146,10 @@ export default {
     handleExpenseDeletion(e) {
       console.log(e);
     },
-    closeEditExpenseDialog() {
-      this.showExpenseEditDialog = false;
+    editExpense() {
+      this.$emit("edit", true);
     },
     expenseDeleted() {
-      this.showExpenseEditDialog = false;
-    },
-    expenseWasEdited(changedExpense) {
-      this.expenseToDisplay = changedExpense
-        ? changedExpense
-        : this.expenseToDisplay;
       this.showExpenseEditDialog = false;
     },
   },
@@ -202,26 +199,9 @@ export default {
   row-gap: 10px;
   width: 100%;
 }
-.minified {
-  grid-template-rows: auto;
-  grid-template-columns: 40px 24px 4fr 40px;
-  grid-template-areas: "sellingPointInitials sellingPointIcon expenseSum moreBtn";
-}
-.expanded {
-  grid-template-rows: 40px auto;
-  grid-template-columns: 40px 24px 4fr 40px 40px;
-  grid-template-areas:
-    "sellingPointInitials sellingPointIcon sellingPointCategoryAndName edit moreBtn"
-    "expenseSum expenseSum expenseSum expenseSum expenseSum";
-}
 
 .expenseSum {
   grid-area: expenseSum;
-}
-
-.editBtn {
-  grid-area: edit;
-  align-self: center;
 }
 
 .dateCreaded {

@@ -13,7 +13,7 @@
         :key="`${expense._id}-${expense.dateCreated}`"
         :expense="expense"
         class="list-item"
-        @edit="startEditingExpense(expense)"
+        @edit="editExpense(expense)"
       />
     </transition-group>
 
@@ -24,9 +24,12 @@
       />
     </div>
 
-    <CreateExpenseDialog
+    <StoreExpenseDialog
       v-if="createDialog"
+      :edit="editing"
+      :expense-to-edit="selectedExpense"
       @created="expenseSuccessfullyCreated"
+      @updated="expenseSuccessfullyCreated"
       @cancel="cancelCreatingExpense"
     />
   </div>
@@ -36,14 +39,14 @@
 // @ is an alias to /src
 import ExpensesMenuBar from "@/components/ExpensesMenuBar";
 import Expenses from "@/components/Expenses";
-import CreateExpenseDialog from "@/components/CreateExpenseDialog";
+import StoreExpenseDialog from "@/components/StoreExpenseDialog";
 
 export default {
   name: "Home",
   components: {
     ExpensesMenuBar,
     Expenses,
-    CreateExpenseDialog,
+    StoreExpenseDialog,
   },
   data() {
     return {
@@ -51,11 +54,14 @@ export default {
       editDialog: false,
       typeToShow: "spontaneous",
       toggleNew: true,
-      selectedExpenseToEdit: null,
+      selectedExpense: {},
+      editing: false,
+      expensesReComputeHelper: 0,
     };
   },
   computed: {
     expenses() {
+      this.expensesReComputeHelper;
       return this.$store.getters["expenses/currentMonth"]
         .filter(exp => exp.type === this.typeToShow)
         .reverse();
@@ -85,7 +91,7 @@ export default {
   },
   methods: {
     expenseSuccessfullyCreated() {
-      console.log("CREATED EXPENSE");
+      this.expensesReComputeHelper++;
       this.createDialog = false;
     },
     toggleExpensesTypeToShow(type) {
@@ -99,16 +105,14 @@ export default {
     },
     cancelCreatingExpense() {
       this.createDialog = false;
+      this.selectedExpense = {};
+      this.editing = false;
     },
-    editedExpense() {
-      this.editDialog = false;
-    },
-    cancelEditingExpense() {
-      this.editDialog = false;
-    },
-    startEditingExpense(expense) {
-      this.editDialog = true;
-      this.selectedExpenseToEdit = expense;
+
+    editExpense(expense) {
+      this.selectedExpense = expense;
+      this.editing = true;
+      this.createDialog = true;
     },
   },
 };
