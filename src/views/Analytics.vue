@@ -1,17 +1,17 @@
 <template>
   <div>
     <h1>This is Analytics</h1>
-    <span class="body">test</span>
-    <v-btn color="primary">
-      test
-    </v-btn>
+
+    <ExpenseAnalysis />
   </div>
 </template>
 
 <script>
+import ExpenseAnalysis from "@/components/ExpenseAnalysis";
+
 export default {
   name: "Analytics",
-  components: {},
+  components: { ExpenseAnalysis },
 };
 </script>
 
