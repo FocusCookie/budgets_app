@@ -56,12 +56,10 @@ export default {
       toggleNew: true,
       selectedExpense: {},
       editing: false,
-      expensesReComputeHelper: 0,
     };
   },
   computed: {
     expenses() {
-      this.expensesReComputeHelper;
       return this.$store.getters["expenses/currentMonth"]
         .filter(exp => exp.type === this.typeToShow)
         .reverse();
