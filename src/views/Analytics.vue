@@ -1,5 +1,12 @@
 <template>
   <div>
+    <v-card
+      v-if="anylizedCategories.length <= 0"
+      outlined
+      class="ma-4 pa-2 rounded-lg"
+    >
+      There are no expenses for the current month to analyze 🕵️‍♀️ .
+    </v-card>
     <div class="pa-4">
       <ExpenseAnalysis
         v-for="cat in anylizedCategories"
@@ -103,8 +110,6 @@ export default {
         if (!catAlreadySet && spOccuredInExpenses)
           usedCategories.push(catWithSum);
       });
-
-      console.log("UC ", usedCategories);
 
       sellingPointsSumsAndShares.forEach(sp => {
         const usedCatIndex = usedCategories.findIndex(
