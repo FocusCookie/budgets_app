@@ -7,7 +7,7 @@
     >
       There are no expenses for the current month to analyze 🕵️‍♀️ .
     </v-card>
-    <div class="pa-4">
+    <div class="pa-4 analyticsWrapper">
       <ExpenseAnalysis
         v-for="cat in anylizedCategories"
         :key="cat.title"
@@ -173,5 +173,9 @@ export default {
   position: fixed;
   bottom: 44px;
   width: 100%;
+}
+
+.analyticsWrapper {
+  margin-bottom: 95px;
 }
 </style>
