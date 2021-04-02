@@ -43,15 +43,15 @@ export default {
     ratioToDisplay() {
       return this.options.currency
         ? `${this.category.sum} €`
-        : `${this.category.percentage} %`;
+        : `${this.category.share} %`;
     },
 
     gradientBackground() {
       return `linear-gradient(
     90deg,
     rgba(95, 46, 234, 1) 0%,
-    rgba(102, 59, 229, 1) ${this.category.percentage}%,
-    rgba(156, 157, 191, 1) ${this.category.percentage}%,
+    rgba(102, 59, 229, 1) ${this.category.share}%,
+    rgba(156, 157, 191, 1) ${this.category.share}%,
     rgba(160, 163, 189, 1) 100%
   )`;
     },
