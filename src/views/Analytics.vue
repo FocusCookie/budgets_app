@@ -39,7 +39,7 @@ export default {
         return this.sellingPointsByCategoryWithSumsAndShares(
           this.selectedCategoryDrillDown,
         );
-      return this.categoriesSumsAndShares().reverse();
+      return this.categoriesSumsAndShares();
     },
     menuBarOptions() {
       return {
@@ -70,7 +70,7 @@ export default {
         return copy;
       });
 
-      return sellingPointsWithTotalSumsAndShare;
+      return sellingPointsWithTotalSumsAndShare.sort((a, b) => b.sum - a.sum);
     },
 
     categoriesSumsAndShares() {
@@ -83,22 +83,47 @@ export default {
       const sellingPointsSumsAndShares = this.sellingPointsSumsAndShares();
       const categories = this.$store.getters["categories/all"];
 
+      const usedCategories = [];
+
       sellingPointsSumsAndShares.forEach(sp => {
         const categoryIndex = categories.findIndex(
           cat => cat.title === sp.category,
         );
-        categories[categoryIndex].sum = sp.sum;
+
+        const catWithSum = { ...categories[categoryIndex], sum: 0 };
+
+        const catAlreadySet = usedCategories.some(
+          cat => cat.title === sp.category,
+        );
+
+        const spOccuredInExpenses = currentMonthExpenses.some(
+          exp => exp.sellingPoint === sp._id,
+        );
+
+        if (!catAlreadySet && spOccuredInExpenses)
+          usedCategories.push(catWithSum);
       });
 
-      const usedCategories = categories.filter(cat => (cat.sum ? cat : false));
+      console.log("UC ", usedCategories);
+
+      sellingPointsSumsAndShares.forEach(sp => {
+        const usedCatIndex = usedCategories.findIndex(
+          cat => cat.title === sp.category,
+        );
+        const spOccuredInExpenses = currentMonthExpenses.some(
+          exp => exp.sellingPoint === sp._id,
+        );
+        if (spOccuredInExpenses) usedCategories[usedCatIndex].sum += sp.sum;
+      });
 
       const usedCategoriesWithSumAndShare = usedCategories.map(el => {
         const category = { ...el };
         category.share = ((category.sum / totalExpensesSum) * 100).toFixed(0);
+
         return category;
       });
 
-      return usedCategoriesWithSumAndShare;
+      return usedCategoriesWithSumAndShare.sort((a, b) => b.sum - a.sum);
     },
 
     sellingPointsByCategoryWithSumsAndShares(category) {
@@ -124,7 +149,7 @@ export default {
         return copy;
       });
 
-      return sellingPointsSumsAndShares.reverse();
+      return sellingPointsSumsAndShares.sort((a, b) => b.sum - a.sum);
     },
 
     selectCategoryToDrillDown(cat) {
